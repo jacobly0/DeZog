@@ -1,5 +1,6 @@
 import {Utility} from '../misc/utility';
 import {Remote} from '../remotes/remotefactory';
+import {Fasmgez80LabelParser} from './fasmgez80labelparser';
 import {SjasmplusLabelParser} from './sjasmpluslabelparser';
 import {Z80asmLabelParser} from './z80asmlabelparser';
 import {Z88dkLabelParser} from './z88dklabelparser';
@@ -124,6 +125,13 @@ export class LabelsClass {
 	 * Especially it contains the path to the list file.
 	 */
 	public readListFiles(mainConfig: any) {
+		// fasmg with ez80
+		if (mainConfig.fasmgez80) {
+			const parser=new Fasmgez80LabelParser(this.fileLineNrs, this.lineArrays, this.labelsForNumber, this.numberForLabel, this.labelLocations, this.watchPointLines, this.assertLines, this.logPointLines);
+			for (const listFile of mainConfig.sjasmplus)
+				parser.loadAsmListFile(listFile);
+		}
+
 		// sjasmplus
 		if (mainConfig.sjasmplus) {
 			const parser=new SjasmplusLabelParser(this.fileLineNrs, this.lineArrays, this.labelsForNumber, this.numberForLabel, this.labelLocations, this.watchPointLines, this.assertLines, this.logPointLines);

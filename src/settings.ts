@@ -23,6 +23,10 @@ export interface AsmConfigBase {
 	filter: string|undefined;
 }
 
+/// fasmg with ez80
+export interface Fasmgez80Config extends AsmConfigBase {
+}
+
 
 /// sjasmplus
 export interface SjasmplusConfig extends AsmConfigBase {
@@ -183,6 +187,7 @@ export interface SettingsParameters extends DebugProtocol.LaunchRequestArguments
 	rootFolder: string;
 
 	/// The paths to the .list files / assembler parameters.
+	fasmgez80: Array<Fasmgez80Config>;
 	sjasmplus: Array<SjasmplusConfig>;
 	z80asm: Array<Z80asmConfig>;
 	z88dk: Array<Z88dkConfig>;
@@ -289,6 +294,7 @@ export class Settings {
 				zxnext: <any>undefined,
 				unitTests: <any>undefined,
 				rootFolder: <any>undefined,
+				fasmgez80: <any>undefined,
 				sjasmplus: <any>undefined,
 				z80asm: <any>undefined,
 				z88dk: <any>undefined,
@@ -399,6 +405,23 @@ export class Settings {
 
 		if(!Settings.launch.rootFolder)
 			Settings.launch.rootFolder=rootFolder;
+
+		// fasmg+ez80
+		if (Settings.launch.fasmgez80) {
+			Settings.launch.fasmgez80=Settings.launch.fasmgez80.map(fp => {
+				// ListFile structure
+				const fpPath=UnifiedPath.getUnifiedPath(fp.path);
+				const fpSrcDirs=UnifiedPath.getUnifiedPathArray(fp.srcDirs);
+				const fpExclFiles=UnifiedPath.getUnifiedPathArray(fp.excludeFiles);
+				const file={
+					path: Utility.getAbsFilePath(fpPath||""),
+					srcDirs: fpSrcDirs||[""],
+					excludeFiles: fpExclFiles||[],
+					filter: fp.filter
+				};
+				return file;
+			});
+		}
 
 		// sjasmplus
 		if (Settings.launch.sjasmplus) {
@@ -620,6 +643,8 @@ export class Settings {
 	 */
 	public static GetAllAssemblerListFiles(configuration: any): Array<AsmConfigBase> {
 		const listFiles=new Array<AsmConfigBase>();
+		if (configuration.fasmgez80)
+			listFiles.push(...configuration.sjasmplus);
 		if (configuration.sjasmplus)
 			listFiles.push(...configuration.sjasmplus);
 		if (configuration.z80asm)
@@ -652,6 +677,11 @@ export class Settings {
 			// Check that file exists
 			if(!fs.existsSync(path))
 				throw Error("File '" + path + "' does not exist.");
+			}
+
+		// Any special check
+		if (Settings.launch.fasmgez80) {
+			// ...
 		}
 
 		// Any special check
