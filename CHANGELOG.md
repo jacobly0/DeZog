@@ -1,7 +1,53 @@
 # Changelog
 
+# 2.0.3
+- Fixed #39: windows path back slash in SLD file.
+- cspect, zsim: LOGPOINT, ASSERTION are printed also on step-over, step-into.
+
+# 2.0.2
+- Help view added. Palette command "dezog.help".
+- New "zsim" option to set the "cpuFrequency".
+- "resetOnLaunch" moved to "zrcp".
+- ASSERTION for ZEsarUX implemented.
+
+# 2.0.1
+- Logging to files removed. vscode does this anyway.
+- sjasmplus list file support disabled.
+
+# 2.0.0
+- Fix in sendDzrpCmd: length of transmitted bytes fixed.
+- Improvements to unit tests. Now ASSERTIONs show the failure values.
+- "sjasmplus" configuration now uses the SLD file instead of a list file to support banking information (long addresses). If you want to use 64k addresses instead there is a new option "disableBanking".
+- launch.json: deprecated option "filter" has been removed.
+- "zsim": Support for custom code added. E.g. it is possible now to add custom peripheral code to implement ports. You can now write code to support peripherals within zsim.
+  - Support for in-ports, out-ports and to generate an interrupt.
+  - Support to create a custom UI within the ZSimulationView.
+  - See [documentation/zsimPeripherals.md](documentation/zsimPeripherals.md) for more details.
+	- New commands
+		- out: Output to port.
+		- in: input from port.
+		- tstates add/set: change t-states.
+	- launch.json: Added parameters for custom code:
+		- customCode.debug: Enables a few debug buttons in ZSimulationView
+		- customCode.jsPath: Path to the custom javascript file.
+		- customCode.uiPath: Path to the custom html UI.
+		- customCode.timeStep: The t-state interval for reporting.
+- "zsim": changed parameters:
+	- Removed: "memoryPagingControl", "tbblueMemoryManagementSlots", "loadZxRom"
+	- Added: "memoryModel": "RAM", "ZX48K", "ZX128K", "ZXNEXT"
+	- Changed: "visualMemory" to boolean.
+- For Kris: Changed naming of "ASSERT" to "ASSERTION" to avoid conflicts with commented sjasmplus ASSERTs. (Also the command was renamed from "-ASSERT" to "-ASSERTION".)
+- 'find' enabled on webviews.
+- Fixed a bug in highlighting register addresses in the MemoryRegisterView .
+- spotHistory now also displays the changed registers.
+- Fixed: during time-travel it is not possible anymore to change the registers.
+- Fixed a bug with UNKNOWN label in call stack during time-travel.
+
+# 1.5.5
+- Fixed an 'Unverified breakpoint' issue for z88dk. (See #38)
+
 # 1.5.4
-- Fixed# 34: Unverified breakpoints in version 1.5.3. Windows 10
+- Fixed #34: Unverified breakpoints in version 1.5.3. Windows 10
 
 # 1.5.3
 - Merged into master branch.
@@ -117,7 +163,7 @@
 - Fixed: Update of word register in case of byte register change (and vice versa).
 
 # 1.2.3
-- Fixed: crash when switching form ZEsarUX to CSpect.
+- Fixed: crash when switching from ZEsarUX to CSpect.
 - Manual change of PC (or SP) will update the shown file.
 - zsim: cpu writing to ROM does not change the contents anymore.
 - zsim: simulator exchanged. Is less buggy and 30% performance increase.

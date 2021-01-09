@@ -21,8 +21,9 @@ suite('Labels (z88dk)', () => {
 			const config={
 				z88dk: [{
 					path: './src/tests/data/labels/projects/z88dk/general/main.lis',
-					srcDirs: [""],
-					mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map"
+					mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map",
+					srcDirs: [""],	// Sources mode
+					excludeFiles: []
 				}]
 			};
 			Labels.readListFiles(config);
@@ -50,8 +51,9 @@ suite('Labels (z88dk)', () => {
 			const config={
 				z88dk: [{
 					path: './src/tests/data/labels/projects/z88dk/general/main.lis',
-					srcDirs: [""],
-					mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map"
+					mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map",
+					srcDirs: [""],	// Sources mode
+					excludeFiles: []
 				}]
 			};
 			Labels.readListFiles(config);
@@ -70,8 +72,9 @@ suite('Labels (z88dk)', () => {
 			const config={
 				z88dk: [{
 					path: './src/tests/data/labels/projects/z88dk/general/main.lis',
-					srcDirs: [""],
-					mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map"
+					mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map",
+					srcDirs: [""],	// Sources mode
+					excludeFiles: []
 				}]
 			};
 			Labels.readListFiles(config);
@@ -93,7 +96,8 @@ suite('Labels (z88dk)', () => {
 					z88dk: [{
 						path: fname,
 						srcDirs: [],	// ListFile-Mode
-						mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map"
+						mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map",
+						excludeFiles: []
 					}]
 				};
 				Labels.readListFiles(config);
@@ -193,9 +197,10 @@ suite('Labels (z88dk)', () => {
 				const config={
 					z88dk: [{
 						path: './src/tests/data/labels/projects/z88dk/general/main.lis',
-						srcDirs: [""],	// Sources-Mode
 						mainFile: "main.asm",
-						mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map"
+						mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map",
+						srcDirs: [""],	// Sources mode
+						excludeFiles: []
 					}]
 				};
 				Labels.readListFiles(config);
@@ -233,9 +238,10 @@ suite('Labels (z88dk)', () => {
 				const config={
 					z88dk: [{
 						path: './src/tests/data/labels/projects/z88dk/general/main.lis',
-						srcDirs: [""],	// Sources-Mode
 						mainFile: "main.asm",
-						mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map"
+						mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map",
+						srcDirs: [""],	// Sources mode
+						excludeFiles: []
 					}]
 				};
 				Labels.readListFiles(config);
@@ -264,9 +270,10 @@ suite('Labels (z88dk)', () => {
 				const config={
 					z88dk: [{
 						path: './src/tests/data/labels/projects/z88dk/general/main.lis',
-						srcDirs: [""],	// Sources-Mode
 						mainFile: "main.asm",
-						mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map"
+						mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map",
+						srcDirs: [""],	// Sources mode
+						excludeFiles: []
 					}]
 				};
 				Labels.readListFiles(config);
@@ -302,14 +309,15 @@ suite('Labels (z88dk)', () => {
 	});
 
 
-	test('Occurence of WPMEM, ASSERT, LOGPOINT', () => {
+	test('Occurence of WPMEM, ASSERTION, LOGPOINT', () => {
 		// Read the list file
 		const config={
 			z88dk: [{
 				path: './src/tests/data/labels/projects/z88dk/general/main.lis',
-				srcDirs: [""],	// Sources-Mode
 				mainFile: "main.asm",
-				mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map"
+				mapFile: "./src/tests/data/labels/projects/z88dk/general/main.map",
+				srcDirs: [""],	// Sources mode
+				excludeFiles: []
 			}]
 		};
 
@@ -324,11 +332,11 @@ suite('Labels (z88dk)', () => {
 		assert.equal(wpLines[0].address, 0x8008);
 		assert.equal(wpLines[0].line, "WPMEM");
 
-		// Test ASSERT
-		const assertLines=Labels.getAssertLines();
-		assert.equal(assertLines.length, 1);
-		assert.equal(assertLines[0].address, 0x8005);
-		assert.equal(assertLines[0].line, "ASSERT");
+		// Test ASSERTION
+		const assertionLines=Labels.getAssertionLines();
+		assert.equal(assertionLines.length, 1);
+		assert.equal(assertionLines[0].address, 0x8005);
+		assert.equal(assertionLines[0].line, "ASSERTION");
 
 		// Test LOGPOINT
 		const lpLines=Labels.getLogPointLines();

@@ -6,13 +6,6 @@ import {AsmConfigBase} from '../settings';
 import * as minimatch from 'minimatch';
 
 
-/// Different label types.
-export enum LabelType {
-	NORMAL,	// The label might be preceded by a module name
-	LOCAL,	// It's a local label. The name is concatenated with the lastLabel.
-	GLOBAL	// The name is taken as is. Not concatenated with anything.
-};
-
 
 /**
  * This class is the base class for the assembler list file parsers.
@@ -20,32 +13,46 @@ export enum LabelType {
 export class LabelParserBase {
 	/// Map that associates memory addresses (PC values) with line numbers
 	/// and files.
+	/// Long addresses.
 	protected fileLineNrs: Map<number, SourceFileEntry>;
 
 	/// Map of arrays of line numbers. The key of the map is the filename.
 	/// The array contains the correspondent memory address for the line number.
+	/// Long addresses.
 	protected lineArrays: Map<string, Array<number>>;
 
 	/// An element contains either the offset from the last
 	/// entry with labels or an array of labels for that number.
-	protected labelsForNumber: Array<any>;
+	/// Array contains a max 0x10000 entries. Thus it is for
+	/// 64k addresses.
+	protected labelsForNumber64k: Array<any>;
+
+	/// This map is used to associate long addresses with labels.
+	/// E.g. used for the call stack.
+	/// Long addresses.
+	protected labelsForLongAddress = new Map<number, Array<string>>();
 
 	/// Map with all labels (from labels file) and corresponding values.
-	protected numberForLabel: Map<string, number>;
+	/// Long addresses.
+	protected numberForLabel = new Map<string, number>();
 
 	/// Map with label / file location association.
 	/// Does not store local labels.
 	/// Is used only for unit tests.
-	protected labelLocations: Map<string, {file: string, lineNr: number}>;
+	/// Long addresses.
+	protected labelLocations: Map<string, {file: string, lineNr: number, address: number}>;
 
 
 	/// Stores the address of the watchpoints together with the line contents.
+	/// Long addresses.
 	protected watchPointLines: Array<{address: number, line: string}>;
 
-	/// Stores the address of the asserts together with the line contents.
-	protected assertLines: Array<{address: number, line: string}>;
+	/// Stores the address of the assertions together with the line contents.
+	/// Long addresses.
+	protected assertionLines: Array<{address: number, line: string}>;
 
 	/// Stores the address of the logpoints together with the line contents.
+	/// Long addresses.
 	protected logPointLines: Array<{address: number, line: string}>;
 
 
@@ -74,26 +81,41 @@ export class LabelParserBase {
 	/// Used to determine if current (included) files are used or excluded in the addr <-> file search.
 	protected excludedFileStackIndex: number;
 
+	/// The used bank size. Only set if the assembler+parser supports
+	/// long addresses. Then it holds the used bank size (otherwise 0).
+	/// Is used to tell if the Labels are long or not and for internal
+	/// conversion if target has a different memory model.
+	/// Typical value: 0, 8192 or 16384.
+	protected bankSize: number;
+
+	// Collects the warnings.
+	protected warnings: string;
+
+
 	// Constructor.
 	public constructor(
 		fileLineNrs: Map<number, SourceFileEntry>,
 		lineArrays: Map<string, Array<number>>,
-		labelsForNumber: Array<any>,
+		labelsForNumber64k: Array<any>,
+		labelsForLongAddress: Map<number, Array<string>>,
 		numberForLabel: Map<string, number>,
-		labelLocations: Map<string, {file: string, lineNr: number}>,
+		labelLocations: Map<string, {file: string, lineNr: number, address: number}>,
 		watchPointLines: Array<{address: number, line: string}>,
-		assertLines: Array<{address: number, line: string}>,
+		assertionLines: Array<{address: number, line: string}>,
 		logPointLines: Array<{address: number, line: string}>
 	) {
 		// Store variables
 		this.fileLineNrs=fileLineNrs;
-		this.lineArrays=lineArrays;
-		this.labelsForNumber=labelsForNumber;
+		this.lineArrays = lineArrays;
+		this.labelsForNumber64k = labelsForNumber64k;
+		this.labelsForLongAddress = labelsForLongAddress;
 		this.numberForLabel=numberForLabel;
 		this.labelLocations=labelLocations;
 		this.watchPointLines=watchPointLines;
-		this.assertLines=assertLines;
+		this.assertionLines=assertionLines;
 		this.logPointLines=logPointLines;
+		this.bankSize=0;
+		this.warnings='';
 	}
 
 
@@ -135,29 +157,13 @@ export class LabelParserBase {
 	 * for each line.
 	 */
 	protected parseAllLabelsAndAddresses() {
-		// Create regex for filter (deprecated)
-		let filterRegEx;
-		let replace;
-		let filter=this.config.filter;
-		if (filter) {
-			// The filter is parsed for search and substitution string.
-			const filterArr=filter.split('/');
-			if (filterArr.length!=4) {
-				throw SyntaxError('List file "filter" string is wrong: "'+filter+'"');
-			}
-			const search=filterArr[1];
-			replace=filterArr[2];
-			filterRegEx=new RegExp(search);
-		}
-
 		// Loop through all lines
 		const fileName=Utility.getRelFilePath(this.config.path);
-		const listLines=readFileSync(this.config.path).toString().split('\n');
+		const listLinesFull = readFileSync(this.config.path).toString().split('\n');
+		// Strip away windows line endings
+		const listLines = listLinesFull.map(line => line.trimRight());
 		let lineNr=0;
 		for (let line of listLines) {
-			// Filter line with regex (deprecated)
-			if (filterRegEx)
-				line=line.replace(filterRegEx, replace);
 			// Prepare an entry
 			this.currentFileEntry={fileName, lineNr, addr: undefined, size: 0, line, modulePrefix: this.modulePrefix, lastLabel: this.lastLabel};
 			this.listFile.push(this.currentFileEntry);
@@ -165,66 +171,13 @@ export class LabelParserBase {
 			// Parse
 			this.parseLabelAndAddress(line);
 
-			// Check for WPMEM, ASSERT and LOGPOINT
+			// Check for WPMEM, ASSERTION and LOGPOINT
 			const address=this.currentFileEntry.addr;
-			this.parseWpmemAssertLogpoint(address, line);
+			this.findWpmemAssertionLogpoint(address, line);
 
 			// Next
 			lineNr++;
 		}
-	}
-
-
-	/**
-	 * Parses the line for comments with WPMEM, ASSERT or LOGPOINT.
-	 * @param address The address that correspondents to the line.
-	 * @param fullLine The line of the list file as string.
-	 */
-	protected parseWpmemAssertLogpoint(address:number|undefined, fullLine: string) {
-		// Extract just comment
-		const comment=this.getComment(fullLine);
-
-		// WPMEM
-		let match=/.*(\bWPMEM\b.*)/.exec(comment);
-		if (match) {
-			// Add watchpoint at this address
-			if (this.currentFileEntry.size==0)
-				this.watchPointLines.push({address: undefined as any, line: match[1]}); // watchpoint inside a macro or without data
-			else
-				this.watchPointLines.push({address: address!, line: match[1]});
-		}
-
-		if (address==undefined)
-			return;
-
-		// ASSERT
-		match=/.*(\bASSERT\b.*)/.exec(comment);
-		if (match) {
-			// Add ASSERT at this address
-			this.assertLines.push({address, line: match[1]});
-		}
-
-		// LOGPOINT
-		match=/.*(\bLOGPOINT\b.*)/.exec(comment);
-		if (match) {
-			// Add logpoint at this address
-			this.logPointLines.push({address, line: match[1]});
-		}
-	}
-
-
-	/**
-	 * Check the list file line for a comment and returns just the comment.
-	 * Only override if you allow other line comment identifiers than ";".
-	 * @param line The line of the list file as string. E.g. "5    A010 00 00 00...  	defs 0x10		; WPMEM, 5, w"
-	 * @returns Just the comment, e.g. the text after ";". E.g. " WPMEM, 5, w"
-	 */
-	protected getComment(line: string): string {
-		const i=line.indexOf(";");
-		if (i<0)
-			return "";	// No comment
-		const comment=line.substr(i+1);
-		return comment;
 	}
 
 
@@ -253,6 +206,63 @@ export class LabelParserBase {
 			// Associate with right file
 			this.associateSourceFileName();
 		}
+	}
+
+
+	/**
+	 * Parses the line for comments with WPMEM, ASSERTION or LOGPOINT.
+	 * Note: This only collect the lines. Parsing is done at a
+	 * later state when all labels are known.
+	 * @param address The address that correspondents to the line.
+	 * @param fullLine The line of the list file as string.
+	 */
+	protected findWpmemAssertionLogpoint(address: number|undefined, fullLine: string) {
+		// Extract just comment
+		const comment=this.getComment(fullLine);
+
+		// WPMEM
+		let match=/.*(\bWPMEM\b.*)/.exec(comment);
+		if (match) {
+			// Add watchpoint at this address
+			/*
+			if (this.currentFileEntry&&this.currentFileEntry.size==0)
+				this.watchPointLines.push({address: undefined as any, line: match[1]}); // watchpoint inside a macro or without data -> Does not work: WPMEM could be on a separate line
+			else
+			*/
+			this.watchPointLines.push({address: address!, line: match[1]});
+		}
+
+		if (address==undefined)
+			return;
+
+		// ASSERTION
+		match=/.*(\bASSERTION\b.*)/.exec(comment);
+		if (match) {
+			// Add ASSERTION at this address
+			this.assertionLines.push({address, line: match[1]});
+		}
+
+		// LOGPOINT
+		match=/.*(\bLOGPOINT\b.*)/.exec(comment);
+		if (match) {
+			// Add logpoint at this address
+			this.logPointLines.push({address, line: match[1]});
+		}
+	}
+
+
+	/**
+	 * Check the list file line for a comment and returns just the comment.
+	 * Only override if you allow other line comment identifiers than ";".
+	 * @param line The line of the list file as string. E.g. "5    A010 00 00 00...  	defs 0x10		; WPMEM, 5, w"
+	 * @returns Just the comment, e.g. the text after ";". E.g. " WPMEM, 5, w"
+	 */
+	protected getComment(line: string): string {
+		const i=line.indexOf(";");
+		if (i<0)
+			return "";	// No comment
+		const comment=line.substr(i+1);
+		return comment;
 	}
 
 
@@ -291,16 +301,21 @@ export class LabelParserBase {
 				let fileLoc=this.labelLocations.get(fullLabel);
 				if (!fileLoc) {
 					// Add new file location
-					fileLoc={file: entry.fileName, lineNr: entry.lineNr};
+					const address: number = entry.addr!;
+					fileLoc = {file: entry.fileName, lineNr: entry.lineNr, address};
 					this.labelLocations.set(fullLabel, fileLoc);
 				}
 			}
 
 			// Check address
-			if (!entry.addr)
+			if (entry.addr == undefined)
 				continue;
 
-			this.fileLineNrs.set(entry.addr, {fileName: entry.fileName, lineNr: entry.lineNr, modulePrefix: entry.modulePrefix, lastLabel: entry.lastLabel});
+			const prevFileLine = this.fileLineNrs.get(entry.addr);
+			if (!prevFileLine || entry.size > 0) {
+				// write new value
+				this.fileLineNrs.set(entry.addr, {fileName: entry.fileName, lineNr: entry.lineNr, modulePrefix: entry.modulePrefix, lastLabel: entry.lastLabel});
+			}
 
 			// Set address
 			if (!lineArray[entry.lineNr]) {	// without the check macros would lead to the last addr being stored.
@@ -328,7 +343,8 @@ export class LabelParserBase {
 				let fileLoc=this.labelLocations.get(fullLabel);
 				if (!fileLoc) {
 					// Add new file location
-					fileLoc={file: entry.fileName, lineNr: entry.lineNr};
+					const address: number = entry.addr!;
+					fileLoc={file: entry.fileName, lineNr: entry.lineNr, address};
 					this.labelLocations.set(fullLabel, fileLoc);
 				}
 			}
@@ -339,17 +355,18 @@ export class LabelParserBase {
 
 			// last address entry wins:
 			for (let i=0; i<entry.size; i++) {
-				const addr=(entry.addr+i)&0xFFFF;
+				const addr=(i==0) ? entry.addr : (entry.addr+i)&0xFFFF;	// Don't mask entry addr if size is 1, i.e. for sjasmplus sld allow higher addresses
 				this.fileLineNrs.set(addr, {fileName: entry.fileName, lineNr: entry.lineNr, modulePrefix: entry.modulePrefix, lastLabel: entry.lastLabel});
 			}
 
-			// Check if a new array need to be created
+
+		// Check if a new array need to be created
 			if (!this.lineArrays.get(entry.fileName)) {
 				this.lineArrays.set(entry.fileName, new Array<number>());
 			}
 
 			// Get array
-			const lineArray=this.lineArrays.get(entry.fileName)||[];
+			const lineArray=this.lineArrays.get(entry.fileName)!;
 
 			// Set address
 			if (!lineArray[entry.lineNr]) {	// without the check macros would lead to the last addr being stored.
@@ -381,7 +398,7 @@ export class LabelParserBase {
 	 * Note: this is not the line number of the list file.
 	 * The list file may include other files. It's the line number of those files we are after.
 	 * Call 'setLineNumber' with the line number to set it. Note that source file numbers start at 0.
-	 * Furthermore it also determines teh beginning and ending of include files.
+	 * Furthermore it also determines the beginning and ending of include files.
 	 * Call 'includeStart(fname)' and 'includeEnd()'.
 	 * @param line The current analyzed line of the listFile array.
 	 */
@@ -422,69 +439,77 @@ export class LabelParserBase {
 
 
 	/**
-	 * Adds a new label to the LabelsForNumber array.
+	 * Adds a new label to the labelsForNumber64k array.
 	 * Creates a new array if required.
 	 * Adds the the label/value pair also to the numberForLabelMap.
-	 * @param value The value for which a new label is to be set.
+	 * Don't use for EQUs > 64k.
+	 * On the other hand long addresses can be passed.
+	 * I.e. everything > 64k is interpreted as long address.
+	 * Handles 64k and long addresses.
+	 * @param value The value for which a new label is to be set. If a value > 64k it needs
+	 * to be a long address.
+	 * I.e. EQU values > 64k are not allowed here.
+	 * @param label The label to add.
+	 */
+	protected addLabelForNumber(value: number, label: string,) {
+		// Remember last label (for local labels)
+		this.lastLabel = label;
+		this.currentFileEntry.lastLabel = this.lastLabel;
+		this.currentFileEntry.modulePrefix = undefined;
+		this.addLabelForNumberRaw(value, label);
+	}
+
+
+	/**
+	 * Adds a new label to the labelsForNumber64k array.
+	 * Creates a new array if required.
+	 * Adds the the label/value pair also to the numberForLabelMap.
+	 * Don't use for EQUs > 64k.
+	 * On the other hand long addresses can be passed.
+	 * I.e. everything > 64k is interpreted as long address.
+	 * Handles 64k and long addresses.
+	 * @param value The value for which a new label is to be set. If a value > 64k it needs
+	 * to be a long address.
+	 * I.e. EQU values > 64k are not allowed here.
 	 * @param label The label to add.
 	 * @param labelType I.e. NORMAL, LOCAL or GLOBAL.
 	 */
-	protected addLabelForNumber(value: number, label: string, labelType=LabelType.GLOBAL) {
-		// Safety check
-		if (value<0||value>=0x10000)
-			return;
+	protected addLabelForNumberRaw(value: number, label: string) {
 
-		switch (labelType) {
-			case LabelType.NORMAL:
-				// Remember last label (for local labels)
-				this.lastLabel=label;
-				this.currentFileEntry.lastLabel=this.lastLabel;
-				// Add prefix
-				if (this.modulePrefix)
-					label=this.modulePrefix+label;
-				break;
-			case LabelType.LOCAL:
-				// local label
-				if (this.lastLabel) // Add Last label
-					label=this.lastLabel+label;
-				// Add prefix
-				if (this.modulePrefix)
-					label=this.modulePrefix+label;
-				break;
-			case LabelType.GLOBAL:
-				// Remember last label (for local labels)
-				this.lastLabel=label;
-				this.currentFileEntry.lastLabel=this.lastLabel;
-				this.currentFileEntry.modulePrefix=undefined;
-				break;
-		}
-
-		// Label: add to label array
+		// Label: add to label array, long address
 		this.numberForLabel.set(label, value);
 
-		// Add label
-		let labelsArray=this.labelsForNumber[value];
+		// Add label to labelsForNumber64k (just 64k address)
+		const value64k = value & 0xFFFF;
+		let labelsArray = this.labelsForNumber64k[value64k];
 		//console.log("labelsArray", labelsArray, "value=", value);
-		if (labelsArray===undefined) {
+		if (labelsArray === undefined) {
 			// create a new array
-			labelsArray=new Array<string>();
-			this.labelsForNumber[value]=labelsArray;
+			labelsArray = new Array<string>();
+			this.labelsForNumber64k[value64k] = labelsArray;
 		}
 		// Check if label already exists
-		for (let item of labelsArray) {
-			if (item==label)
-				return;	// already exists.
-		}
+		if (labelsArray.indexOf(label) < 0)
+			labelsArray.push(label);	// Add new label
 
-		// Add new label
-		labelsArray.push(label);
+		// Add label to labelsForLongAddress
+		labelsArray = this.labelsForLongAddress.get(value);
+		//console.log("labelsArray", labelsArray, "value=", value);
+		if (labelsArray === undefined) {
+			// create a new array
+			labelsArray = new Array<string>();
+			this.labelsForLongAddress.set(value, labelsArray);
+		}
+		// Check if label already exists
+		if (labelsArray.indexOf(label) < 0)
+			labelsArray.push(label);	// Add new label
 	}
 
 
 	/**
 	 * Adds the address to the list file array.
 	 * Call this even if size is 0. The addresses are also required for
-	 * lines that may contain only a comment, e.g. LOGPOINT, WPMEM, ASSERT:
+	 * lines that may contain only a comment, e.g. LOGPOINT, WPMEM, ASSERTION:
 	 * @param address The address of the line. Could be undefined.
 	 * @param size The size of the line. E.g. for a 2 byte instruction this is 2.
 	 * Has to be 1 if address is undefined.
@@ -574,5 +599,29 @@ export class LabelParserBase {
 		this.currentFileEntry.lineNr=lineNr;
 	}
 
+
+	/**
+	 * Creates a long address from the address and the page info.
+	 * If page == -1 address is returned unchanged.
+	 * @param address The 64k address, i.e. the upper bits are the slot index.
+	 * @param bank The bank the address is associated with.
+	 * @returns if bankSize: address+((page+1)<<16)
+	 * else: address.
+	 */
+	protected createLongAddress(address: number, bank: number) {
+		let result = address;
+		if (this.bankSize != 0)
+			result += (bank + 1) << 16;
+		return result;
+	}
+
+
+	/**
+	 * Returns the collected warnings.
+	 * undefined if no warnings.
+	 */
+	public getWarnings() {
+		return this.warnings;
+	}
 }
 

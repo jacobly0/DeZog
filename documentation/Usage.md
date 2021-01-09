@@ -2,10 +2,61 @@
 
 This document describes the features of DeZog and how they can be used.
 
+## Support
+
+If you like DeZog please consider supporting it.
+
+<a title="PayPal" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8S4R8HPXVCXUL&source=url">
+	<img src="images/btn_donate_SM.gif" />
+</a>
+
+
+If you would like to contribute, e.g. by adding a new assembler or adding other remotes/emulators, see "Contribution" [here](https://github.com/maziac/DeZog/blob/master/README.md#contribution).
+
+
+
+## Migration from DeZog 1.5
+If you installed DeZog 1.5 before [here](https://github.com/maziac/DeZog/blob/master/documentation/Migration.md) are a few tips to migrate to 2.0.
+
+
+## General Usage
+
+A typical debug session with DeZog looks as follows:
+1. Create a binary of your assembler program together with a list or SLD file for DeZog
+2. Start DeZog (therefore you need a working launch.json config file)
+3. Debug, i.e. set breakpoints, run, step through your code, evaluate registers and memory
+4. Stop DeZog
+5. Loop to 1
+
+When using the internal Z80 simulator "zsim" that's basically it.
+
+When using an external [remote](#what-is-a-remote), i.e. an emulator or the ZX Next, you need to start that as well.
+
+I have noticed that this part, the interaction between DeZog and the emulator, often confuses people.
+So I would like to sketch out the intended/main usage scenario.
+
+Many people try to start the emulator while starting DeZog and close it when stopping the DeZog debug session.
+This is **not required**.
+If you work with an emulator you would start the emulator once and then let it running.
+When you start a debug session DeZog will connect to it, **transfer the program to the emulator** and start the program.
+When you stop the debug session DeZog will disconnect from the emulator.
+(Disconnecting from the emulator may have the effect of keeping the program running in the emulator. This is simply because the emulator now continues execution).
+
+I.e. your workflow is as follows:
+1. Start vscode
+2. Start the emulator (or even several emulators/remotes)
+3. Create a binary of your assembler program
+4. Start DeZog
+5. Debug memory
+6. Stop DeZog
+7. Loop to 3
+
+You normally need to re-start the emulator only if it behaves weird, does not connect to DeZog anymore or crashes.
+
 
 ## Sample Program
 
-I provide a simple sample assembler program to demonstrate the features of DeZog.
+With DeZog a simple assembler program is provided to demonstrate the features of DeZog.
 
 You can find it here:
 https://github.com/maziac/z80-sample-program
@@ -14,14 +65,13 @@ It includes the sources and the binaries (.list, .sna files). So, if you don't w
 
 
 ## Configuration
-
 ### launch.json
 
 After installing you need to add the configuration for "DeZog".
 
 A typical configuration looks like this:
 
-~~~
+~~~json
     "configurations": [
         {
             "type": "dezog",
@@ -34,16 +84,9 @@ A typical configuration looks like this:
             "sjasmplus": [
                 {
                     "path": "z80-sample-program.list",
-                },
-                /*
-                {
-                    "path": "rom48.list",
-                    "srcDirs": [], // Use list file directly
-                },
-                */
+                }
             ],
             "startAutomatically": false,
-            "skipInterrupt": true,
             "history": {
                 "reverseDebugInstructionCount": 10000,
                 "codeCoverageEnabled": true
@@ -53,7 +96,7 @@ A typical configuration looks like this:
                 //"-patterns"
             ],
             "disassemblerArgs": {
-        		numberOfLines: 20,
+        		"numberOfLines": 20,
                 "esxdosRst": true
             },
             "rootFolder": "${workspaceFolder}",
@@ -76,7 +119,7 @@ list file also for the ROM area you can add it here.
 Please have a look at the [Listfile](#listfile) section.
 - startAutomatically: If true the program is started directly after loading. If false the program stops after launch. (Default=true). Please note: If this is set to true and a .tap file is loaded it will stop at address 0x0000 as this is where ZEsarUX tape load emulation starts.
 - reverseDebugInstructionCount: The number of lines you can step back during reverse debug. Use 0 to disable.
-- codeCoverageEnabled: If enabled (default) code coverage information is displayed. I.e. allsource codes lines that have been executed are highlighted in green. You can clear the code coverage display with the command palette "dezog: Clear current code coverage decoration".
+- codeCoverageEnabled: If enabled (default) code coverage information is displayed. I.e. all source codes lines that have been executed are highlighted in green. You can clear the code coverage display with the command palette "dezog: Clear current code coverage decoration".
 - commandsAfterLaunch: Here you can enter commands that are executed right after the launch and connection of the debugger. These commands are the same as you can enter in the debug console. E.g. you can use "-sprites" to show all sprites in case of a ZX Next program. See [Debug Console](#debug-console).
 - disassemblerArgs: Arguments that can be passed to the internal disassembler.
     - numberOfLines: The number of lines displayed in the disassembly.
@@ -84,22 +127,24 @@ Please have a look at the [Listfile](#listfile) section.
 - rootFolder: Typically = workspaceFolder. All other file paths are relative to this path.
 - topOfStack: This is an important parameter to make the callstack display convenient to use. Please add here the label of the top of the stack. Without this information DeZog does not know where the stack ends and may show useless/misleading/wrong information. In order to use this correctly first you need a label that indicates the top of your stack. Here is an example how this may look like:
 
-~~~assembly
 Your assembler file:
+~~~assembly
 stack_bottom:
     defs    STACK_SIZE*2, 0
 stack_top:
+~~~
 
 In your launch.json:
+~~~json
 "topOfStack": "stack_top"
 ~~~
 
 Note:
 - topOfStack: instead of a label you can also use a fixed number.
 - load: The .nex, .sna (or .tap) file to load. On start of the debug session ZEsarUX is instructed to load this file.
-Note: you can also omit this. In that case the DeZog attaches to the emulator without loading a program. Breakpoints and the list/assembler files can still be set.
+Note: you can also omit this. In that case DeZog attaches to the emulator without loading a program. Breakpoints and the list/assembler files can still be set.
 - loadObjs: Instead of a .nex, .sna or .tap file you can also directly load binary object files. You can load several object files and you have to give path and start address for each file, e.g.:
-~~~
+~~~json
 "loadObjs": [
     { "path": "out/main.bin", "start": "0x6000" },
     { "path": "out/graphics.bin", "start": "0x8000" }
@@ -150,7 +195,7 @@ DeZog supports the list file formats of both of them and additionally the sjasmp
 
 #### Background info: The list file
 
-The most important configuration to do is the *.list file. The list file contains
+The most important configuration to do is the *.list file (or *.sld file). The list file contains
 all the information required by DeZog. While reading this file DeZog
 - associates addresses with line numbers
 - associates addresses with files
@@ -166,50 +211,83 @@ Now depending on the value of 'srcDirs'
 
 **sjasmplus configuration:**
 
-E.g.
+Note: sjasmplus can generate a list file but since DeZog version 2.0.0 DeZog does not use the sjasmplus list file anymore but the SLD file. You need sjasmplus >= 1.18.0 for DeZog to parse the SLD file correctly.
+
+SLD stands for "Source Level Debugging" and is an format with similar information as the list file.
+List files are meant to be read by humans whereas the SLD file format is optimized for reading by a machine, i.e. DeZog, which makes parsing much easier.
+Apart from that the list file is lacking information about ['long addresses'](#long-addresses-explanation). I.e. addresses that not only include the address it self (0-0xFFFF) but also information about the paging/banking.
+With this information DeZog is able to correctly associate files that are assembled for the same address but for different memory banks. It is also possible to place breakpoints correctly as not only the 64k address of a breakpoint is checked but also it's bank.
+
+In order to let sjasmplus create an SLD file you need to set the following option on the command line:
+~~~bash
+--sld=your-program.sld
+E.g.:
+sjasmplus --sld=main.sld --fullpath main.asm
 ~~~
+
+Inside one of your asm files you need to set a few more options:
+- Use ```DEVICE something``` to set a device. Otherwise the SLD file will be empty. You can e.g. use ```ZXSPECTRUM48```, ```ZXSPECTRUM128```, ```ZXSPECTRUMNEXT``` or for a non-spectrum pure Z80 system without any banking: **```NOSLOT64K```**
+- Add a line ```SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION``` to use DeZog's WPMEM, LOGPOINT and ASSERTION features. If ```SLDOPT ...``` is omitted sjasmplus will remove the info from the SLD file.
+
+E.g. you could start your main.asm with:
+~~~asm
+    DEVICE ZXSPECTRUMNEXT
+    SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
+~~~
+
+or
+~~~asm
+    DEVICE NOSLOTDEVICE
+    SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
+~~~
+
+Then for the launch.json file you simply have to set the path to the SLD file. E.g.:
+~~~json
 "sjasmplus": [{
-    "path": "z80-sample-program.list",
-    "srcDirs": [""],
-    "excludefiles": [ "some_folder/*" ]
+    "path": "z80-sample-program.sld"
     }]
 ~~~
 
+Note: If for some reason you want to turn the banking information, i.e. the long addresses you can do so by setting ```disableBanking``` to true.
+~~~json
+"sjasmplus": [{
+    "path": "z80-sample-program.sld"
+    }],
+    "disableBanking": true
+~~~
 
-- path: the path to the list file (relative to the 'rootFolder').
+**Savannah-z80asm configuration:**
+
+Same as sjasmplus but use: ```z80asm```, e.g.:
+~~~json
+"z80asm": [{
+    "path": "z80-sample-program.list",
+    "srcDirs": [""],
+    "excludeFiles": [ "some_folder/*" ]
+    }]
+~~~
+
+- path: The path to the list file.
 - srcDirs (default=[""]):
     - [] = Empty array. Use .list file directly for stepping and setting of breakpoints.
     - array of strings = Non-empty. Use the (original source) files mentioned in the .list file. I.e. this allows you to step through .asm source files. The sources are located in the directories given here. They are relative to the 'rootFolder'. Several sources directories can be given here. All are tried. If you don't arrange your files in subfolders just use '[""]' here or omit the parameter to use the default.
     - If you build your .list files from .asm files then use 'srcDirs' parameter. If you just own the .list file and not the corresponding .asm files don't use it.
 - excludeFiles (default=[]): an array of glob patterns with filenames to exclude. The filenames (from the 'include' statement) that do match will not be associated with executed addresses. I.e. those source files are not shown during stepping. You normally only need this if you have multiple source files that share the same addresses. In that case one of the source files is shown. If that is the wrong one you can exclude it here. In the example above all files from "some_folder" are excluded.
-- filter: This is a deprecated parameter. It was meant to read list files from assemblers other than the implemented ones. It contains a string with a regular expression substitution to pre-filter the file before reading. E.g. "/^[0-9]+\\s+//": This is a sed-like regular expression that removes the first number from all lines. Default: undefined. The field will be removed in future versions and is here only for compatibility. If you have need for other supported assemblers please provide a full implementation. Please read the [AddingNewAssemblers.md](../design/AddingNewAssemblers.md) doc.
-
-Note: when using sjasmplus use the "--lst=filename.list" option to generate the list file. Additionally you can use "--lstlab" which lets sjasmplus add a labels section after the listing. This labels section will be evaluated by DeZog as well. It is not necessary but helps DeZog to parse more complicated labels like alias labels etc.
-
-
-**Savannah-z80asm configuration:**
-
-Same as sjasmplus but use: ```z80asm```, e.g.:
-~~~
-"z80asm": [{
-    "path": "z80-sample-program.list",
-    "srcDirs": [""]
-    }]
-~~~
 
 
 **z88dk-z80asm configuration:**
 
-~~~
+~~~json
 "z88dk": [{
     "path": "currah_uspeech_tests.lis",
     "srcDirs": [""],
     "mapFile": "currah_uspeech_tests.map",
     "mainFile": "currah_uspeech_tests.asm",
+    "excludeFiles": [ "some_folder/*" ]
     }]
 ~~~
 
-For 'path' and 'srcDirs' see sjasmplus configuration.
+For 'path', 'srcDirs' nad 'excludeFiles' see z80asm configuration.
 
 - mapFile: The map file is required to correctly parse the label values and to get correct file/line to address associations.
 - mainFile: The relative path of the file used to create the list file.
@@ -223,7 +301,7 @@ But this makes sense only if the format is very similar.
 
 It is a better choice either to switch the assembler (e.g. I recommend sjasmplus) or write a new parser the assembler and add it to Dezog.
 
-The process of writing a parser is described in detail here: [AddingNewAssemblers.md](AddingNewAssemblers.md)
+The process of writing a parser is described in detail here: [AddingNewAssemblers.md](https://github.com/maziac/DeZog/blob/master/design/AddingNewAssemblers.md)
 
 You can create a pull request so I can add it to the official release.
 
@@ -244,7 +322,7 @@ I.e. the disassembly at the current PC is always correct while an older disassem
 The following table lists the differences of the different assemblers in respect to the labels:
 
 | Feature | Savannah/z80asm | z88dk/z80asm | sjasmplus |
-|-|-|-|-|
+|:--|:--|:--|:--|
 | Local lables | no | no | yes |
 | Needs a ':' | yes | yes | no
 | Dots (.) are allowed (also at start of label) | no | no | yes |
@@ -273,7 +351,7 @@ DeZog supports most of them but with some restrictions:
 
 In the launch.json you can use another property to control the formatting of the registers done in the VARIABLES area.
 
-~~~
+~~~json
 "formatting": [
     "AF", "AF: ${hex}h, F: ${flags}",
     "AF'", "AF': ${hex}h, F': ${flags}",
@@ -321,21 +399,25 @@ The different Remotes have different capabilities in conjunction with DeZog.
 The following table gives an overview.
 
 |                     | Internal Z80 Simulator | ZEsarUX | ZesaruxExt | ZX Next  | CSpect   |
-|-------------------------|--------------------|---------|------------|----------|----------|
+|:------------------------|:-------------------|:--------|:-----------|:---------|:---------|
 | State                   | stable             | stable  | stable     | stable   | stable   |
 | Breakpoints             | yes                | yes     | yes/fast   | yes      | yes      |
 | Break reason output     | yes                | no      | yes        | yes      | yes      |
 | Conditional Breakpoints | yes                | yes     | yes/fast   | yes/slow | yes/slow |
-| Watchpoints             | yes                | yes     | yes/fast   | no       | no       |
-| Asserts                 | yes                | no      | yes        | yes/slow | yes/slow |
-| Logpoints               | yes                | no      | yes        | yes/slow | yes/slow |
+| WPMEM (Watchpoints) support | yes            | yes 2)  | yes/fast 2) | no      | no       |
+| ASSERTION support       | yes                | yes      | yes        | yes/slow | yes/slow |
+| LOGPOINT support        | yes                | no      | yes        | yes/slow | yes/slow |
+| Long addresses/breakpoints | yes             | yes     | yes        | yes      | yes      |
 | Extended callstack      | no                 | yes     | yes        | no       | no       |
-| Code coverage           | yes                | yes     | yes        | no       | no       |
+| Code coverage           | yes                | yes 1)  | yes        | no       | no       |
 | Reverse debugging       | true               | true    | true       | lite     | lite     |
 | ZX Next capable         | no                 | yes     | yes        | yes      | yes      |
 | Save/restore the state  | yes                | yes     | yes        | no       | no       |
 | Output of T-States      | yes                | yes     | yes        | no       | no       |
 | Display of sprite attributes/patterns | yes  | yes     | yes        | no       | yes      |
+| Load .sna/.nex/.obj file through DeZog | yes | yes     | yes        | yes      | yes      |
+| Load .tap file through DeZog | no            | yes     | yes        | no       | no       |
+| Run Z80 Unit Tests      | yes                | yes     | yes        | no       | no       |
 | Comments     | slower than ZEsarUx or CSpect |         | Breakpoints are faster than in ZEsarUX | |
 
 Notes:
@@ -346,7 +428,8 @@ Notes:
     - planned: Development has not yet started.
 - slow/fast: "slow" means that the evaluation is done by DeZog. This involves stopping the emulator (the remote) at a break point and evaluating the breakpoint in DeZog. If the condition is false the emulator is 'continued'. "fast" mens that the evaluation is done by the remote (the emulator) itself. Thus no communication with DeZog is involved and therefore it is much faster.
 - ZesaruxExt is not available at the moment.
-
+- 1 ) ZEsarUX code coverage uses 16 bit addresses only. I.e. if slots are changed during execution the shown info might be wrong. But in most cases the output will be just fine.
+- 2 ) ZEsarUX memory breakpoints use 16bit only. I.e. no support for long addresses. You may experience that a memory breakpoint is hit in a wrong bank if banking is used.
 
 ### The Internal Z80 Simulator
 
@@ -379,7 +462,7 @@ It allows to test programs that does not make use of special HW features like th
 - The ZX128 memory banks
 - Loading of (48 and 128) .sna and .nex files
 
-It specificly does not support:
+It specifically does not support:
 - ZX Next HW (other than memory bank switching)
 - Loading of .tap/.tzx files
 - Audio
@@ -397,40 +480,80 @@ The included simulator does not. This means: if you step through your assembly c
 The simulator on the other hand immediately displays any change to the screen while stepping. This can also be an advantage during debugging.
 
 Example launch.json configuration:
-~~~
+~~~json
     "remoteType": "zsim",
     "zsim": {
         "Z80N": true,
-    	"loadZxRom": true,
         "zxKeyboard": true,
-	    "visualMemory": "true",
 	    "ulaScreen": true,
-	    "memoryPagingControl": true,
-        "tbblueMemoryManagementSlots": true,
+	    "visualMemory": true,
         "cpuLoadInterruptRange": 1,
-        "vsyncInterrupt": true
+        "vsyncInterrupt": true,
+        "cpuFrequency": 3500000.0,
+        "memoryModel": "RAM",
+        "customCode": {
+            "debug": true,
+            "jsPath": "myPeripheral.js",
+            "uiPath": "myUi.html",
+            "timeStep": 1000
+        }
     }
 ~~~
 
-With all options disabled zsim behaves just as a Z80 CPU with 64k RAM.
-The default configuration enables: loadZxRom, zxKeyboard, visualMemory, ulaScreen and cpuLoadInterruptRange. So in the default configuration this basically simulates a ZX 48K Spectrum.
-For ZX 128K support you should add the memoryPagingControl option.
+With all options disabled zsim behaves just as a Z80 CPU with 64k RAM without any ZX Spectrum features.
+
+If you need to define a ZX48K machine you could use
+~~~json
+    "zsim": {
+        "zxKeyboard": true,
+	    "ulaScreen": true,
+	    "visualMemory": true,
+        "vsyncInterrupt": true,
+        "memoryModel": "ZX48K"
+    }
+~~~
+
+For a ZX128K:
+~~~json
+    "zsim": {
+        "zxKeyboard": true,
+	    "ulaScreen": true,
+	    "visualMemory": true,
+        "vsyncInterrupt": true,
+        "memoryModel": "ZX128K"
+    }
+~~~
+
+For a ZX Next like system (note: this simulates only the Next's memory paging):
+~~~json
+    "zsim": {
+        "Z80N": true,
+        "zxKeyboard": true,
+	    "ulaScreen": true,
+	    "visualMemory": true,
+        "vsyncInterrupt": true,
+        "memoryModel": "ZXNEXT"
+    }
+~~~
 
 Here is the explanations of all the options:
 - "Z80N": true/false. Defaults to false. Enables the Z80N (ZX Next) instruction set. See https://wiki.specnext.dev/Extended_Z80_instruction_set .
-- "loadZxRom": true/false. Defaults to true. Loads the 48K Spectrum ROM (or the 128K Spectrum ROM) at start. Otherwise the memory 0-0x3FFF is empty RAM.
-- "zxKeyboard": true/false. Defaults to true. If enabled the simulator shows a keyboard to simulate keypresses.
+- "zxKeyboard": true/false. Defaults to false. If enabled the simulator shows a keyboard to simulate keypresses.
 ![](images/zsim_keyboard.jpg)
-- "visualMemory": true/false. Defaults to true. If enabled the simulator shows the access to the memory (0-0xFFFF) visually while the program is running.
+- "visualMemory": If true the simulator shows the access to the memory (0-0xFFFF) visually while the program is running. Default is true.
 ![](images/zsim_visual_memory.jpg)
-- "ulaScreen": true/false. Defaults to true. If enabled it shows the contents of the ZX Spectrum screen.
+- "memoryModel": The used memory model (defaults to "RAM"), i.e.
+    - "RAM": One memory area of 64K RAM, no banks.
+	- "ZX48": ROM and RAM as of the ZX Spectrum 48K.
+	- "ZX128": Banked memory as of the ZX Spectrum 48K (16k slots/banks).
+	- "ZXNEXT": Banked memory as of the ZX Next (8k slots/banks).
+- "ulaScreen": true/false. Defaults to false. If enabled it shows the contents of the ZX Spectrum screen.
 ![](images/zsim_ula_screen.jpg)
-- "memoryPagingControl": true/false. Defaults to false. If enabled the ZX 128K memory banks can be paged in. Use this to simulate a ZX 128K. zsim uses USR0 mode. I.e. at startup the 48K ROM is paged in.
-- "tbblueMemoryManagementSlots": true/false. Default to false. If enabled the ZX Next memory banking is enabled through registers 0x50-0x57. Use this to simulate ZX Next memory banking.
 - "cpuLoadInterruptRange": Default is 1. The number of interrupts to calculate the CPU-load average from. 0 to disable. The CPU load is calculated by the number of executed t-states of all instructions without the HALT instruction divided by the number of all executed t-states. I.e. the time the CPU executes just HALT instructions is not considered as CPU load. Naturally, if you have turned off interrupts the CPU load is always 100%. Normally the average is calculated from interrupt to interrupt but you can extend the range to 2 or more interrupts. To disable the display choose 0.
 ![](images/zsim_cpu_load.jpg)
-- "vsyncInterrupt": Default is true if some ZX Spectrum feature is enabled otherwise false. If enabled an interrupt is generated after ca. 20ms (this assumes a CPU clock of 3.5MHz).
-
+- "vsyncInterrupt": Default is false. Enable it if you use zsim to emulate a ZX Spectrum. If enabled an interrupt is generated after ca. 20ms (this assumes a CPU clock of 3.5MHz).
+- "cpuFrequency": The CPU frequency is only used for output. I.e. when the t-states are printed there is also a printout of the correspondent time. This is calculated via the CPU frequency here. It does not affect in any way the simulation speed.
+- "customCode": This enables the custom code to run inside the simulator, e.g. to simulate additional ports. See [zsimPeripherals.md](https://github.com/maziac/DeZog/blob/master/documentation/zsimPeripherals.md) for more details.
 
 
 ### ZEsarUX
@@ -464,7 +587,7 @@ You need to enable the ZRCP in ZEsarUX. In ZEsarUX enable the socket zrcp protoc
 or from the ZEsarUX UI ("Settings"->"Debug"->"Remote protocol" to "Enabled").
 
 You need to enable ZEsarUX in your Z80 program's launch.json configuration, e.g.:
-~~~
+~~~json
     "remoteType": "zrcp",
     "zrcp": {
         "port": 10000
@@ -473,7 +596,7 @@ You need to enable ZEsarUX in your Z80 program's launch.json configuration, e.g.
 
 The "zrcp" configuration allows the following additional parameters:
 - "port": The ZEsarUX port. If not changed in ZEsarUX this defaults to 10000.
-- "hostname": The host's name. I.e. the IP of the machine that is running ZEsarUX. If you are not doing any remote debugging this is typically "localhost". Note: Real remote debugging (emulator runnign on another PC) does work, but requires a mechanism to copy the .sna/nex file to the remote computer.
+- "hostname": The host's name. I.e. the IP of the machine that is running ZEsarUX. If you are not doing any remote debugging this is typically "localhost". Note: Real remote debugging (emulator running on another PC) does work, but requires a mechanism to copy the .sna/nex file to the remote computer.
 You don't have to enter a hostname, the default is "localhost".
 - skipInterrupt: Is passed to ZEsarUX at the start of the debug session. If true (default is false) ZEsarUX does not break in interrupts (on manual break).
 - "loadDelay": Some people encounter a crash (rainbow/kernel panic) of ZEsarUX at the start of a debug session when running under Windows. If that is true for you as well you can experiment with the "loadDelay" option which adds an additional delay at startup. This mitigates the problem.
@@ -499,28 +622,28 @@ To ease the usage of ZEsarUX with DeZog you can use several ZEsarUX command line
 I have collected a few that I found useful:
 
 ```bash
-# Try this if the ZEsarUX screen is not updated during debugging.
+## Try this if the ZEsarUX screen is not updated during debugging.
 ./zesarux --disable-autoframeskip &
 ```
 
 ```bash
-# Start a "normal" ZX Spectrum (48k) and listen for connection from the DeZog.
+## Start a "normal" ZX Spectrum (48k) and listen for connection from DeZog.
 ./zesarux --enable-remoteprotocol &
 ```
 
 ```bash
-# Start in ZX Next configuration. ZEsarUX skips the booting and emulates the esxdos rst routines.
-# The file system is mounted via "--esxdos-root-dir".
-# With this configuration ZX Next programs can be very easily developed and debugged.
-# The Z80 program is passes as SNA file. "--sna-no-change-machine" disables the ZEsarUX automatic change to a 48k Spectrum machine.
-#./zesarux --noconfigfile --machine tbblue --realvideo --enabletimexvideo --tbblue-fast-boot-mode --sna-no-change-machine --enable-esxdos-handler --esxdos-root-dir "\<path-to-your-z0-programs-dir\>" --enable-remoteprotocol &
+## Start in ZX Next configuration. ZEsarUX skips the booting and emulates the esxdos rst routines.
+## The file system is mounted via "--esxdos-root-dir".
+## With this configuration ZX Next programs can be very easily developed and debugged.
+## The Z80 program is passes as SNA file. "--sna-no-change-machine" disables the ZEsarUX automatic change to a 48k Spectrum machine.
+##./zesarux --noconfigfile --machine tbblue --realvideo --enabletimexvideo --tbblue-fast-boot-mode --sna-no-change-machine --enable-esxdos-handler --esxdos-root-dir "\<path-to-your-z0-programs-dir\>" --enable-remoteprotocol &
 ```
 
 ```bash
-# ZX Next: Start from MMC.
-# To change an mmc file (e.g. on Mac) take the original tbblue.mmc, change the extension
-# to .iso (tbblue.iso). Mount the iso image. Add your files. Unmount the image.
-# Rename back to .mmc (optional).
+## ZX Next: Start from MMC.
+## To change an mmc file (e.g. on Mac) take the original tbblue.mmc, change the extension
+## to .iso (tbblue.iso). Mount the iso image. Add your files. Unmount the image.
+## Rename back to .mmc (optional).
 ./zesarux --machine tbblue --sna-no-change-machine --enable-mmc --enable-divmmc-ports --mmc-file "<your-mmc-image>"  --enable-remoteprotocol &
 ```
 
@@ -556,20 +679,20 @@ For this setup you need 2 additional programs: the CSpect emulator and the DeZog
 
 
 The remote type is "cspect".
-CSpect needs to run before the debug session starts and needs to be connected via a socket interface ([DZRP](design/DeZogProtocol.md)).
+CSpect needs to run before the debug session starts and needs to be connected via a socket interface ([DZRP](https://github.com/maziac/DeZog/blob/master/design/DeZogProtocol.md)).
 CSpect does not offer a socket interface to DeZog by itself it needs the help of the [Dezog CSpect Plugin](https://github.com/maziac/DeZogPlugin).
 
 You need to install it first. Please see [here](https://github.com/maziac/DeZogPlugin/blob/master/Readme.md#plugin-installation).
 
 
 You need to enable CSpect in your Z80 program's launch.json configuration, e.g.:
-~~~
+~~~json
     "remoteType": "cspect",
 ~~~
 
 That should normally do.
 If you need to configure the port use:
-~~~
+~~~json
     "remoteType": "cspect",
     "cspect": {
         "port": 11000
@@ -635,7 +758,7 @@ In order to communicate with the ZX Next special SW needs to run on the Next, th
 
 
 Example launch.json configuration:
-~~~
+~~~json
     "remoteType": "zxnext",
     "zxnext": {
         "port": 12000
@@ -648,7 +771,7 @@ The "zxnext" configuration allows the following additional parameters:
 You don't have to enter a hostname, the default is "localhost".
 
 The default port is anyway 12000. So, if you don't change it, you just have to add:
-~~~
+~~~json
     "remoteType": "zxnext"
 ~~~
 
@@ -664,7 +787,7 @@ Setup a debug session:
 1. In your ZX Next SD card exchange the ```enNextMf.rom``` in directory ```machines/next``` with the one from the [dezogif](https://github.com/maziac/dezogif) project. You find the ```enNextMf.rom``` binary in the [releases](https://github.com/maziac/dezogif/releases) section.
 (Don't forget to make a backup of the original ```enNextMf.rom```.)
 2. Add a configuration as shown above in your launch.json (For an example look at the [z80-sample-program](https://github.com/maziac/z80-sample-program)).
-3. Connect your PC/Mac with the ZX Next via a serial connection. On the ZX Next use the joystick ports for the UART connection (preferrable Joy 2).
+3. Connect your PC/Mac with the ZX Next via a serial connection. On the ZX Next use the joystick ports for the UART connection (preferable Joy 2).
 4. Start the [DeZogSerialInterface](https://github.com/maziac/DeZogSerialInterface) in a terminal. For macos e.g. use:
 ./dezogserialinterface-macos -socket 12000 -serial /dev/cu.usbserial-AQ007PCD
 Notes:
@@ -702,9 +825,9 @@ You should only try to do this yourself if you already have experience with elec
 
 **IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM THE USE OF THE HW, SW OR ANYTHING ELSE PRESENTED HERE.**
 
-You require a USB/Serial converter like this [one](https://www.amazon.com/Serial-Adapter-Female-FT232RL-Windows/dp/B07R45QJVR/ref=sr_1_1_sspa?__mk_de_DE=ÅMÅŽÕÑ&dchild=1&keywords=Serial+UART-Konverterkabel+USB+TTL+3.3+V&qid=1595515176&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEyR1M0VFUzR0tGVkgmZW5jcnlwdGVkSWQ9QTA0Mzk4NDYzVUkySkE0S0ZGS0MwJmVuY3J5cHRlZEFkSWQ9QTA3NzU0NDQzRU85R05FQkJMMEFSJndpZGdldE5hbWU9c3BfYXRmJmFjdGlvbj1jbGlja1JlZGlyZWN0JmRvTm90TG9nQ2xpY2s9dHJ1ZQ==
-):
+You require a USB/Serial converter like this [one](https://www.amazon.com/Serial-Adapter-Female-FT232RL-Windows/dp/B07R45QJVR/ref=sr_1_1_sspa?__mk_de_DE=ÅMÅŽÕÑ&dchild=1&keywords=Serial+UART-Konverterkabel+USB+TTL+3.3+V&qid=1595515176&sr=8-1-spons&psc=1&spLa=ZW5jcnlwdGVkUXVhbGlmaWVyPUEyR1M0VFUzR0tGVkgmZW5jcnlwdGVkSWQ9QTA0Mzk4NDYzVUkySkE0S0ZGS0MwJmVuY3J5cHRlZEFkSWQ9QTA3NzU0NDQzRU85R05FQkJMMEFSJndpZGdldE5hbWU9c3BfYXRmJmFjdGlvbj1jbGlja1JlZGlyZWN0JmRvTm90TG9nQ2xpY2s9dHJ1ZQ==):
 ![](images/usb_serial_cable.jpg)
+
 It needs to be capable of 921600 Baud.
 
 (Note: I also used a cable from Adafruit. It's working as well. It was faster for small packets but I had to disconnect it physically from my mac more often to get it back working.)
@@ -775,7 +898,7 @@ B) Performance: If you have a large stack or a **wrong topOfStack** setting in t
 
 A) For SW breakpoints internally the instruction is replaced with a RST instruction. I.e. when a breakpoint is hit the PC is placed on the stack.
 Thus, if a breakpoint is placed at a location where the SP has been manipulated the stack is corrupted when the breakpoint is hit.
-~~~
+~~~assembly
 		push bc
 		inc sp
 BP->	inc sp
@@ -818,7 +941,7 @@ To set a breakpoint first pause your program by pressing the yellow NMI button. 
 
 
 E) Stepping over RST 8 is possible. However if RST 8 is used for the ESXDOS file operations you should enable **esxdosRst** with
-~~~
+~~~json
 "disassemblerArgs": {
     "esxdosRst": true
 },
@@ -886,7 +1009,7 @@ E.g. one instruction line will occupy ca. 40 bytes of memory. So to store 1 seco
 Or in other words: if you would like to spend 1GB RAM you could store 25 secs.
 
 The number of instructions is set in
-~~~
+~~~json
 "history": {
     "reverseDebugInstructionCount": 20000,
 }
@@ -913,7 +1036,7 @@ You can only rely on the register values.
 #### History Spot
 
 You can enable/disable a history spot around the current PC:
-~~~
+~~~json
 "history": {
     "spotCount": 10
 }
@@ -923,23 +1046,42 @@ If enabled (!= 0) you see the historic indices of the instructions. E.g. here:
 ![](images/spot_count1.jpg)
 
 The indices are shown in brackets to the right.
-The PC is currently in line 988.
-The previous executed instruction is at index -1. Before at line 986 is index -2.
-Before that instrucion at index -3 (line 1008) we see that there was a branch. Obviously the flags have been NZ and the branch was taken.
+The PC is currently in line 32.
+The previous executed instruction is at index -1. Before at line 30 is index -2.
 
 With the *History Spot* you can see what has just happened before without having to back step.
+
+After the ":" you can see register values of changed registers. The displayed value is the register(s) that have been changed after the instruction was executed.
+Some explanations:
+- line 25: SP is shown because it was changed from the previous line which called the function (not shown here).
+- line 26: No register value has changed
+- line 27: In previous instruction register e has been loaded from l. But because e and l were already equal no value was changed. Therefore no register is displayed.
+- line 28: In previous line register D was changed.
+- line 29: In previous line register DE was incremented.
+- line 30: In previous line register BC was decremented.
+- line 31: In previous line LDIR has been executed. This is a block command. I.e. several registers are changed at once. After LDIR has been executed BC is 0 and you see the last values of DE and HL.
 
 In case a line/instruction has been executed more than once you will find several indices in the brackets. E.g.:
 ![](images/spot_count2.jpg)
 
 When you step back you can also see the next instructions i.e. where you came from.
-If 'spotcount' is e.g. 10 you see a maximum of 10 previous and next indices.
+If 'spotCount' is e.g. 10 you see a maximum of 10 previous and next indices.
 
-Here is an animated gif to illustrate the behaviour:
+Note: Changed registers are not shown for the first line of the spot.
+
+Display of changed registers is enabled by default. You can turn it off by setting 'spotShowRegisters' to false:
+~~~json
+"history": {
+    "spotCount": 10,
+    "spotShowRegisters": false
+}
+~~~
+
+Here is an animated gif to illustrate the history spot behavior while stepping (with register display turned off):
 ![](images/spot_count_animated.gif)
 
 
-#### Breakpoints in Reverse Debug Mode
+#### Breakpoints etc. in Reverse Debug Mode
 
 You can also use breakpoints during reverse debugging.
 The normal (program counter related) breakpoints work just as you would expect.
@@ -954,10 +1096,13 @@ b@(HL) == 0
 will be evaluated to true always so that you don't miss such a breakpoint.
 
 
+Logpoints (LOGPOINT), watchpoints (WPMEM) and ASSERTIONs are not evaluated during reverse debugging.
+
+
 ### Code Coverage
 
 Code coverage can be enabled/disabled via:
-~~~
+~~~json
 "history": {
     "codeCoverageEnabled": true
 }
@@ -1051,48 +1196,48 @@ Notes:
 - (sjasmplus) If you use label names make sure to use the global name (i.e. full dot notation).
 
 
-### ASSERT
+### ASSERTION
 
-Similar to WPMEM you can use ASSERTs in comments in the assembler sources.
-An ASSERT is translated by DeZog into a breakpoints with an "inverted" condition.
-For all ASSERTs in your source code DeZog can set the correspondent breakpoints automatically at startup.
+Similar to WPMEM you can use ASSERTIONs in comments in the assembler sources.
+An ASSERTION is translated by DeZog into a breakpoints with an "inverted" condition.
+For all ASSERTIONs in your source code DeZog can set the correspondent breakpoints automatically at startup.
 
-The ASSERT syntax is:
+The ASSERTION syntax is:
 
 ~~~
-; [.*] ASSERT expr [;.*]
+; [.*] ASSERTION expr [;.*]
 ~~~
-'expr' is just like the expressions in [breakpoints](#vscode-breakpoint-conditions).
+'expr' is just like the expressions in [breakpoints](#vscode-breakpoint).
 
 Examples:
 ~~~
-; ASSERT HL <= LBL_END+2
-ld a,b  ; Check that index is not too big ASSERT B < (MAX_COUNT+1)/2
-ld de,hl    ; ASSERT A < 5 && hl != 0 ; Check that pointer is alright
+; ASSERTION HL <= LBL_END+2
+ld a,b  ; Check that index is not too big ASSERTION B < (MAX_COUNT+1)/2
+ld de,hl    ; ASSERTION A < 5 && hl != 0 ; Check that pointer is alright
 ~~~
 
-As an ASSERT converts to a breakpoint it is always evaluated **before** the instruction.
+As an ASSERTION converts to a breakpoint it is always evaluated **before** the instruction.
 I.e. the following check will most probably not work as expected.
 
 ~~~
-ld a,c  ; ASSERT a < 7
+ld a,c  ; ASSERTION a < 7
 ~~~
-A is not loaded yet when the ASSERT is checked. So use
+A is not loaded yet when the ASSERTION is checked. So use
 
 ~~~
 ld a,c
-; ASSERT a < 7
+; ASSERTION a < 7
 ~~~
-instead: The ASSERT is on the next line i.e. at the address after the "LD" instruction and thus A is checked correctly.
+instead: The ASSERTION is on the next line i.e. at the address after the "LD" instruction and thus A is checked correctly.
 
 Notes:
 
-- ASSERT is not available in ZEsarUX.
-- you can use "ASSERT" only, which evaluates to "ASSERT false". I.e. this is equivalent to an unconditional break.
-- The asserts are checked in the list file. I.e. whenever you change an ASSERT it is not immediately used. You have to assemble a new list file and start the debugger anew.
-- ASSERTs are disabled by default. If you want to have asserts enabled after launch then put "-ASSERT enable" in the "commandsAfterLaunch" settings.
-- Other than for sjasmplus ASSERTs are evaluated also in not assembled areas, e.g. in case the surrounding IF/ENDIF is not valid.
-- As a special form you can also define an ASSERT without any condition. This will act as a breakpoint that will always be hit when the program counter reaches the instruction.
+- ASSERTION is not available in ZEsarUX.
+- you can use "ASSERTION" only, which evaluates to "ASSERTION false". I.e. this is equivalent to an unconditional break.
+- The assertions are checked in the list file. I.e. whenever you change an ASSERTION it is not immediately used. You have to assemble a new list file and start the debugger anew.
+- ASSERTIONs are disabled by default. If you want to have assertions enabled after launch then put "-ASSERTION enable" in the "commandsAfterLaunch" settings.
+- Other than for sjasmplus ASSERTIONs are evaluated also in not assembled areas, e.g. in case the surrounding IF/ENDIF is not valid.
+- As a special form you can also define an ASSERTION without any condition. This will act as a breakpoint that will always be hit when the program counter reaches the instruction.
 - sjasmplus: If you use label names make sure to use the global name (i.e. full dot notation).
 
 
@@ -1164,8 +1309,8 @@ __Breakpoints in interrupts:__
 
 You can also set breakpoints in interrupts.
 
-But when you also set the launch.json option "skipInterrupts" to true you will feel that the behaviour is somewhat strange:
-If the breakpoint is hit the program will stop, but because of "skipInterrupts" it will stop after the interrupt finished.
+But when you also set the launch.json option "skipInterrupt" to true you will feel that the behavior is somewhat strange for ZEsarUX:
+If the breakpoint is hit the program will stop, but because of "skipInterrupt" it will stop after the interrupt finished.
 
 Although the behavior is correct it looks like the program is randomly stopping.
 
@@ -1253,7 +1398,7 @@ Note: What is saved depends solely on the Remote, i.e. ZEsarUx or the internal s
 If you enter
 
 ~~~
--md <address> <size>
+-mv <address> <size>
 ~~~
 in the debug console you open a memory viewer.
 
@@ -1273,7 +1418,7 @@ The memory viewer will offer a few extra infos:
 You can also open multiple memory dumps at once by adding more address/size ranges to the command, e.g.:
 
 ~~~
--md 0 0x100 0x8000 0x40 0x8340 0x10
+-mv 0 0x100 0x8000 0x40 0x8340 0x10
 ~~~
 This opens a memory dump view 3 memory blocks.
 Please note that if you enter overlapping blocks the dump will merge them in the display.
@@ -1283,6 +1428,10 @@ DeZog opens a special memory viewer by itself on startup: it shows the locations
 The register memory view:
 
 ![](images/memoryviewer2.jpg)
+
+
+Note:
+The memory views always work in the 64k area. I.e. they don't use 'long addresses' (banks).
 
 
 ##### Memory Editor
@@ -1407,37 +1556,44 @@ results in
 ![](images/watches_comment.jpg)
 
 
+Note:
+Watches always work in the 64k area. I.e. they don't use 'long addresses' (banks).
+
+
 ### Change the Program Counter
 
 The PC can be changed via the menu. Click in the source line. Do a right-click
 and choose "Move Program Counter to Cursor".
 
-See [Notes](#Notes).
+
+### 'Long Addresses' Explanation
+
+In DeZog the term 'long address' is used to distinguish an address with banking information from a 'normal' 64k address.
+
+A Z80 CPU can address only 64k of address space, i.e. addresses 0x0000 to 0xFFFF.
+For big programs this is too small.
+Therefore banking/paging mechanisms have been invented which swap the memory of certain address ranges (e.g. 0xC000-0xDFFF) and exchange it with memory contents of another bank.
+E.g. the ZX 128K has 8 different memory banks. The ZX Next has more than 100.
+The size of a bank may also differ. E.g. a ZX 128K has 8 banks a 16K byte. The ZX Next (in assembler) uses 8K byte banks (often also referred to as a page).
+
+A 'long address' refers to an address (0x0000-0xFFFF) plus its bank information. I.e. even if an address points to an address in the Z80 64k address space, DeZog can determine the correct memory by additionally evaluating what memory is currently paged in.
 
 
 ## Unittests
 
-You can use the DeZog to execute unit tests.
-Please see [here](UnitTests.md).
+You can use DeZog to execute unit tests.
+Please see [here](https://github.com/maziac/DeZog/blob/master/documentation/UnitTests.md).
 
 
 ## Known Issues
 
 - **General**
-  - **"ASSERT"s** are set on startup but if for the same address an breakpoint already exists (e.g. from a previous session) it is not changed. If e.g. the ASSERT / breakpoint condition is changed it is not updated. Workaround: Remove all breakpoints manually before debugging the assembler program.
   - **Hovering** does work only on the file that is currently debugged, i.e. where the PC (program counter) is. This seems to be a restriction of vscode. debug-adapter-protocol issue #86 https://github.com/microsoft/debug-adapter-protocol/issues/86
 - **ZEsarUX** (found with v8.1)
-    - **Windows** only: Some people encounter a crash (rainbow/kernel panic) of ZEsarUX at the start of a debug session. If that is true for you as well you can experiment with the "[loadDelay](documentation/Usage.md#zesarux)" option which adds an additional delay at startup. This mitigates the problem.
+    - **Windows** only: Some people encounter a crash (rainbow/kernel panic) of ZEsarUX at the start of a debug session. If that is true for you as well you can experiment with the "[loadDelay](#zesarux)" option which adds an additional delay at startup. This mitigates the problem.
 The default for Windows is 100 (ms). If you run into this problem you can try to increase the value to 400 or even 1000. (You can also try smaller values than 100).
     - Watchpoint (**WPMEM** aka memory breakpoints) and reverse debugging: There is a subtle problem with the memory breakpoints in ZEsarUX. The cpu-history command (used when reverse debugging) does access the memory the same way as the Z80 cpu emulation does. Thus a read might fire a memory breakpoint in the same way. This results in breaks of the program execution when you would not expect it. The memory read is 4 byte at PC (program counter) and 2 bytes at SP. Often you don't even notice because you don't place a watchpoint (WPMEM) at those places but in case you guard your **stack** with WPMEM you need to be aware of it: You shouldn't guard the top of the stack directly but at least grant 2 extra bytes at the top of the stack that are unguarded. See the [z80-sample-program](https://github.com/maziac/z80-sample-program) for placing the WPMEM correctly.
-- **CSpect** (found with v2.12.26)
+- **CSpect** (found with v2.13.0)
   - Watchpoints do not work and are therefore disabled.
-  - Z80 unit tests do not work. Because of above watchpoint problem.
-
-
-## Notes
-
-- Don't use "-exec run" in the debug console. It will lead to a disconnection of ZEsarUX. Instead use the continue button (the green arrow).
-
 
 

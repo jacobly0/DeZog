@@ -1,4 +1,7 @@
 
+    DEVICE NOSLOT64K
+    SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION
+
 
 label_equ1:		equ 100
 
@@ -20,7 +23,7 @@ label2:	ld a,5
 .locala:	ld b,8
 
 .localb:
-	nop		; ASSERT
+	nop		; ASSERTION
 
 label3:	m1
  m1

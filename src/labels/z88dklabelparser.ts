@@ -2,8 +2,6 @@ import {LabelParserBase} from './labelparserbase';
 import {Utility} from '../misc/utility';
 import {readFileSync} from 'fs';
 import {AsmConfigBase, Z88dkConfig} from '../settings';
-import {Labels} from './labels';
-
 
 /**
  * This class parses sjasmplus list files.
@@ -80,7 +78,6 @@ export class Z88dkLabelParser extends LabelParserBase {
 	 */
 	protected parseLabelAndAddress(line: string) {
 		let countBytes=0;
-		console.log("labelsForNumber[32769]", (Labels as any).labelsForNumber[32769]);
 
 		// Replace line number with empty string.
 		line=line.replace(this.z88dkRegEx, '');
@@ -111,8 +108,9 @@ export class Z88dkLabelParser extends LabelParserBase {
 								valueString=cAddrString;
 							}
 							// Evaluate
-							const value=Utility.evalExpression(valueString, false);
-							//const entry = { value, file: fileName, line: lineNr};
+							let value = Utility.evalExpression(valueString, false);
+							// Restrict label to 64k (Note: >64k is interpreted as long address)
+							value &= 0xFFFF;
 							// Add label
 							this.addLabelForNumber(value, label);
 						}

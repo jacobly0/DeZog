@@ -2,9 +2,10 @@
 import * as assert from 'assert';
 import {RemoteBase} from '../remotes/remotebase';
 import {Settings} from '../settings';
-import {Z80RegistersClass, Z80Registers, Z80RegistersStandardDecoder} from '../remotes/z80registers';
+import {Z80RegistersClass, Z80Registers} from '../remotes/z80registers';
 import {Opcodes, Opcode} from '../disassembler/opcode';
 import {GenericBreakpoint, GenericWatchpoint} from '../genericwatchpoint';
+import {Z80RegistersStandardDecoder} from '../remotes/z80registersstandarddecoder';
 
 
 suite('RemoteBase', () => {
@@ -23,7 +24,7 @@ suite('RemoteBase', () => {
 
 
 
-	suite('WPMEM, ASSERT, LOGPOINT', () => {
+	suite('WPMEM, ASSERTION, LOGPOINT', () => {
 
 		test('WPMEM', async () => {
 			const remote=new RemoteBase();
@@ -62,25 +63,25 @@ suite('RemoteBase', () => {
 		});
 
 
-		test('ASSERT', async () => {
+		test('ASSERTION', async () => {
 			const remote=new RemoteBase();
 			const rem=remote as any;
 
 			const wpLines=[
-				{address: 0xA020, line: "ASSERT"},
-				{address: 0xA021, line: "ASSERT B==1"},
+				{address: 0xA020, line: "ASSERTION"},
+				{address: 0xA021, line: "ASSERTION B==1"},
 			];
 
-			const asserts: Array<GenericBreakpoint>=rem.createAsserts(wpLines);
-			assert.equal(asserts.length, 2);
+			const assertions: Array<GenericBreakpoint>=rem.createAssertions(wpLines);
+			assert.equal(assertions.length, 2);
 
-			assert.equal(asserts[0].address, 0xA020);
-			assert.equal(asserts[0].condition, "!(false)");
-			assert.equal(asserts[0].log, undefined);
+			assert.equal(assertions[0].address, 0xA020);
+			assert.equal(assertions[0].condition, "!(false)");
+			assert.equal(assertions[0].log, undefined);
 
-			assert.equal(asserts[1].address, 0xA021);
-			assert.equal(asserts[1].condition, "!(B==1)");
-			assert.equal(asserts[1].log, undefined);
+			assert.equal(assertions[1].address, 0xA021);
+			assert.equal(assertions[1].condition, "!(B==1)");
+			assert.equal(assertions[1].log, undefined);
 		});
 
 
@@ -129,9 +130,9 @@ suite('RemoteBase', () => {
 			public ix: number;
 			public iy: number;
 			public pcMemory=new Uint8Array(4);
-			public spMemory=new Uint16Array(1);
-			public async getRegisters(): Promise<void> {
-				const cache=Z80RegistersClass.getRegisterData(this.pc, this.sp, 0, 0, 0, this.hl, this.ix, this.iy, 0, 0, 0, 0, 0, 0, 0);
+			public spMemory = new Uint16Array(1);
+			public async getRegistersFromEmulator(): Promise<void> {
+				const cache=Z80RegistersClass.getRegisterData(this.pc, this.sp, 0, 0, 0, this.hl, this.ix, this.iy, 0, 0, 0, 0, 0, 0, 0, []);
 				Z80Registers.setCache(cache);
 
 			}
@@ -147,10 +148,11 @@ suite('RemoteBase', () => {
 
 		test('RET', async () => {
 			const remote=new RemoteBaseMock();
-			const rem=remote as any;
+			const rem = remote as any;
 
 			remote.pc=0x8000;
-			remote.sp=0xF000;
+			remote.sp = 0xF000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xC9;	// RET
 			remote.spMemory[0]=0x1234;	// return address
 
@@ -170,7 +172,8 @@ suite('RemoteBase', () => {
 			const rem=remote as any;
 
 			remote.pc=0x8000;
-			remote.sp=0xF000;
+			remote.sp = 0xF000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xC0;	// RET NZ
 			remote.spMemory[0]=0x1234;	// return address
 
@@ -189,7 +192,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xCD;	// CALL
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(true);	// stepOver
@@ -209,10 +213,11 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xCD;	// CALL
 			remote.pcMemory[1]=0x67;
-			remote.pcMemory[2]=0x45;
+			remote.pcMemory[2] = 0x45;
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(false);	// stepInto
 			assert.equal(0xCD, opcode.code);
@@ -230,7 +235,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xC7;	// RST 0
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(true);	// stepOver
@@ -243,7 +249,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xCF;	// RST 8
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(true);	// stepOver
@@ -259,7 +266,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xCF;	// RST 8
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(true);	// stepOver
@@ -272,7 +280,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xD7;	// RST 16
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(false);	// stepInto
@@ -285,7 +294,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xCF;	// RST 8
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(false);	// stepInto
@@ -301,7 +311,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xCF;	// RST 8
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(false);	// stepInto
@@ -314,7 +325,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xC3;	// JP
 			remote.pcMemory[1]=0x67;
 			remote.pcMemory[2]=0x45;
@@ -347,7 +359,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xC2;	// JP Z
 			remote.pcMemory[1]=0x67;
 			remote.pcMemory[2]=0x45;
@@ -367,7 +380,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0x38;	// JR C
 			remote.pcMemory[1]=0x05;
 
@@ -386,7 +400,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0x10;	// DJNZ
 			remote.pcMemory[1]=256-5;		// -5
 
@@ -406,7 +421,8 @@ suite('RemoteBase', () => {
 			const rem=remote as any;
 
 			remote.pc=0x8000;
-			remote.hl=0x4567;
+			remote.hl = 0x4567;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xE9;	// JP (HL)
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(false);	// stepInto
@@ -425,7 +441,8 @@ suite('RemoteBase', () => {
 			const rem=remote as any;
 
 			remote.pc=0x8000;
-			remote.ix=0x4567;
+			remote.ix = 0x4567;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xDD;	// JP (IY)
 			remote.pcMemory[1]=0xE9;
 
@@ -445,7 +462,8 @@ suite('RemoteBase', () => {
 			const rem=remote as any;
 
 			remote.pc=0x8000;
-			remote.iy=0x4567;
+			remote.iy = 0x4567;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xFD;	// JP (IY)
 			remote.pcMemory[1]=0xE9;
 
@@ -464,7 +482,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xED;	// LDIR
 			remote.pcMemory[1]=0xB0;	// LDIR
 
@@ -496,7 +515,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0xED;	// CPIR
 			remote.pcMemory[1]=0xB1;	// CPIR
 
@@ -528,7 +548,8 @@ suite('RemoteBase', () => {
 			const remote=new RemoteBaseMock();
 			const rem=remote as any;
 
-			remote.pc=0x8000;
+			remote.pc = 0x8000;
+			await remote.getRegistersFromEmulator();
 			remote.pcMemory[0]=0x76;	// HALT
 
 			let [opcode, bp1, bp2]=await rem.calcStepBp(false);	// stepInto

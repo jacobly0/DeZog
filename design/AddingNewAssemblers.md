@@ -16,7 +16,7 @@ The main extracted information is:
 
 Apart from this it also looks for instrumentation in the comments to extract
 - watchpoints
-- asserts
+- assertions
 - and logpoints
 
 
@@ -26,7 +26,7 @@ To make it even more complicated there exist two modes when parsing a list file:
 1. ListFile-Mode: The list file is the source. I.e. when stepping through a program the list file itself is shown and you are stepping through the list file no matter from what sources the list file was generated
 2. Sources-Mode: The list file is used to find the association between the source files (your assembler files) with the step addresses. When you step through the code you step through your source files.
 
-The mode is determined by the "srcDirs" launch.jso parameter. This is an array which contains the directories where source file can be located. If the array has length 0 (is empty) ListFile-Mode is assumed. If directories are given Sources-Mode is assumed.
+The mode is determined by the "srcDirs" launch.json parameter. This is an array which contains the directories where source file can be located. If the array has length 0 (is empty) ListFile-Mode is assumed. If directories are given Sources-Mode is assumed.
 
 
 # Process
@@ -114,13 +114,33 @@ A label contains the following info:
 - value (a number)
 
 
-# WPMEM, ASSERT, LOGPOINT
+# WPMEM, ASSERTION, LOGPOINT
 
 You don't need to take care of those.
 These are normally automatically parsed.
-Unless you override ```parseAllLabelsAndAddresses```. In that case make sure to call ```parseWpmemAssertLogpoint```for every line.
+Unless you override ```parseAllLabelsAndAddresses```. In that case make sure to call ```parseWpmemAssertionLogpoint```for every line.
 
 If your assembler allows other one-line comment identifiers than ";", e.g. "//", then you need to override ```getComment```.
+
+
+# Long Addresses
+
+DeZog can handle ['long addresses'](../documentation/Usage.md#long-addresses-explanation).
+Long addresses contain the address information 0x0000-0xFFFF plus the banking information (if there is one).
+
+If your assembler has no special banking support you don't have to take of this.
+But if it is capable you should store the addresses with banking information.
+
+DeZog uses a very simply format to store the banking information inside the address:
+~~~
+longAddress == ((bank+1) << 16) + address
+~~~
+
+I.e. an address < 0x10000 is always an address without banking information.
+Everything >= 0x10000 contains banking information.
+
+So if your assembler gives you the information what bank an address is you should use it.
+Use the 'createLongAddress' to create a long address from bank and address.
 
 
 # Make DeZog aware of the new Assembler
@@ -154,7 +174,7 @@ For testing you should prepare a project for your assembler that includes
 - a local label (if supported)
 - an EQU label
 - modules (2 nested modules), if modules are supported
-- lines with WPMEM, ASSERT and LOGPOINT. Although you normally you don't need to implement something special to support these keywords it needs to be tested at least that the keywords are correctly found.
+- lines with WPMEM, ASSERTION and LOGPOINT. Although you normally you don't need to implement something special to support these keywords it needs to be tested at least that the keywords are correctly found.
 
 Then generate a list file.
 
@@ -168,7 +188,7 @@ Create unit tests that:
 - checks the association of an address to a file, both for list ListFile-Mode and Sources-Mode.
 - checks the association of a file/line number to an address, both for list ListFile-Mode and Sources-Mode.
 - checks occurrence of at least one WPMEM
-- checks occurrence of at least one ASSERT
+- checks occurrence of at least one ASSERTION
 - checks occurrence of at least one LOPGPOINT
 
 
@@ -203,3 +223,4 @@ Make sure to convert all of the paths (e.g. 'path') in your assembler settings w
 
 Document the new assembler configuration inside [Usage.md](../documentation/Usage.md) in the chapter "Assembler Configuration".
 Please also don't forget to update the table in "Assemblers and Labels".
+
