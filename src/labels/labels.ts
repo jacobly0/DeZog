@@ -5,6 +5,7 @@ import {Z80Registers} from '../remotes/z80registers';
 import {SjasmplusSldLabelParser} from './sjasmplussldlabelparser';
 import {Z80asmLabelParser} from './z80asmlabelparser';
 import {Z88dkLabelParser} from './z88dklabelparser';
+import {Fasmgez80LabelParser} from './fasmgez80labelparser';
 import * as fs from 'fs';
 
 
@@ -18,6 +19,7 @@ export interface SourceFileEntry {
 	lineNr: number;		/// The line number of the associated source file
 	modulePrefix?: string;	/// For sjasmplus: module is an optional module prefix that is added to all labels (e.g. "sprites.sw.").
 	lastLabel?: string;	/// For sjasmplus: lastLabel is the last non-local label that is used as prefix for local labels. modulePrefix and lastLabel are used for hovering.
+	// verify for fasmgez80
 }
 
 
@@ -238,6 +240,16 @@ export class LabelsClass {
 				this.filePaths.push(config.path);
 			}
 		}
+
+		// fasmg with ez80
+		if (mainConfig.fasmgez80) {
+			const parser=new Fasmgez80LabelParser(this.fileLineNrs, this.lineArrays, this.labelsForNumber, this.numberForLabel, this.labelLocations, this.watchPointLines, this.assertLines, this.logPointLines);
+			for (const listFile of mainConfig.fasmgez80)
+				parser.loadAsmListFile(listFile);
+				// Store path
+				this.filePaths.push(config.path);
+		}
+		
 
 		// Add new assemblers here ...
 

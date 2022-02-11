@@ -47,6 +47,10 @@ export interface Z88dkConfig extends AsmConfigBase {
 }
 
 
+/// fasmg with ez80
+export interface Fasmgez80Config extends AsmConfigBase {
+}
+
 
 export interface Formatting {
 	/// Format how the registers are displayed in the VARIABLES area.
@@ -272,7 +276,8 @@ export interface SettingsParameters extends DebugProtocol.LaunchRequestArguments
 	sjasmplus: Array<SjasmplusConfig>;
 	z80asm: Array<Z80asmConfig>;
 	z88dk: Array<Z88dkConfig>;
-
+	fasmgez80: Array<Fasmgez80Config>;
+	
 
 	/// The paths to the .labels files.
 	//labelsFiles: Array<string>;
@@ -374,6 +379,7 @@ export class Settings {
 				sjasmplus: <any>undefined,
 				z80asm: <any>undefined,
 				z88dk: <any>undefined,
+				fasmgez80: <any>undefined,
 				smallValuesMaximum: <any>undefined,
 				disassemblerArgs: <any>undefined,
 				tmpDir: <any>undefined,
@@ -562,6 +568,25 @@ export class Settings {
 			});
 		}
 
+		// fasmg+ez80
+		if (Settings.launch.fasmgez80) {
+			Settings.launch.fasmgez80=Settings.launch.fasmgez80.map(fp => {
+				// ListFile structure
+				const fpPath=UnifiedPath.getUnifiedPath(fp.path);
+				const fpSrcDirs=UnifiedPath.getUnifiedPathArray(fp.srcDirs);
+				const fpExclFiles=UnifiedPath.getUnifiedPathArray(fp.excludeFiles);
+				const file={
+					path: Utility.getAbsFilePath(fpPath||""),
+					srcDirs: fpSrcDirs||[""],
+					excludeFiles: fpExclFiles||[],
+					filter: fp.filter
+				};
+				if (fpPath)
+					file.path = Utility.getAbsFilePath(fpPath, rootFolder)
+				return file;
+			});
+		}
+		
 
 		if (!launchCfg.topOfStack)
 			launchCfg.topOfStack = '0x10000';
@@ -740,6 +765,8 @@ export class Settings {
 			listFiles.push(...configuration.z80asm);
 		if (configuration.z88dk)
 			listFiles.push(...configuration.z88dk);
+		if (configuration.fasmgez80)
+			listFiles.push(...configuration.fasmgez80);
 
 		return listFiles;
 	}
@@ -825,6 +852,11 @@ export class Settings {
 				if (!fs.existsSync(mapFile))
 					throw Error("'z88dk.mapFile': '" + mapFile + "' does not exist.");
 			}
+		}
+
+		// Any special check fasmgez80
+		if (Settings.launch.fasmgez80) {
+			// ...
 		}
 
 		// sna/tap
