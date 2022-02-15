@@ -1,0 +1,265 @@
+flat assembler  version g.isbt0
+Total lenght125
+
+LISTING
+
+00000000 (romadd81.inc,6):                         SCANKEYB equ $02BB
+00000000 (romadd81.inc,37):                         ROMPAUSE equ $0F35
+00000000 (romadd81.inc,39):                         RESET equ $0000
+00000000 (romadd81.inc,40):                         SLOWFAST equ $0207
+00000000 (romadd81.inc,41):                         SETFAST equ $02E7
+00000000 (romadd81.inc,42):                         NEXTLINE equ $0676
+00000000 (romadd81.inc,43):                         DECODEKEY equ $07bd
+00000000 (romadd81.inc,44):                         PRINTAT equ $08f5
+00000000 (romadd81.inc,45):                         MAKEROOM equ $099e
+00000000 (romadd81.inc,46):                         CLS equ $0a2a
+00000000 (romadd81.inc,47):                         STACK2BC equ $0bf5
+00000000 (romadd81.inc,48):                         STACK2A equ $0c02
+00000000 (romadd81.inc,49):                         CLASS6 equ $0d92
+00000000 (romadd81.inc,50):                         FINDINT equ $0ea7
+00000000 (romadd81.inc,51):                         FAST equ $0f23
+00000000 (romadd81.inc,52):                         SLOW equ $0f2b
+00000000 (romadd81.inc,53):                         DEBOUNCE equ $0f4b
+00000000 (romadd81.inc,54):                         SETMIN equ $14BC
+00000000 (charst81.inc,11):                         ___ equ $00
+00000000 (charst81.inc,12):                         _c_ equ $00
+00000000 (charst81.inc,13):                         _QT equ $0B
+00000000 (charst81.inc,14):                         _CL equ $0e
+00000000 (charst81.inc,15):                         _OB equ $10
+00000000 (charst81.inc,16):                         _CB equ $11
+00000000 (charst81.inc,17):                         _GT equ $12
+00000000 (charst81.inc,18):                         _LT equ $13
+00000000 (charst81.inc,19):                         _EQ equ $14
+00000000 (charst81.inc,20):                         _iEQ equ $94
+00000000 (charst81.inc,21):                         _PL equ $15
+00000000 (charst81.inc,22):                         _MN equ $16
+00000000 (charst81.inc,23):                         _FS equ $18
+00000000 (charst81.inc,24):                         _SC equ $19
+00000000 (charst81.inc,25):                         _DT equ $1b
+00000000 (charst81.inc,26):                         _c0 equ $1c
+00000000 (charst81.inc,27):                         _c1 equ $1d
+00000000 (charst81.inc,28):                         _c2 equ $1e
+00000000 (charst81.inc,29):                         _c3 equ $1f
+00000000 (charst81.inc,30):                         _c4 equ $20
+00000000 (charst81.inc,31):                         _c5 equ $21
+00000000 (charst81.inc,32):                         _c6 equ $22
+00000000 (charst81.inc,33):                         _c7 equ $23
+00000000 (charst81.inc,34):                         _c8 equ $24
+00000000 (charst81.inc,35):                         _c9 equ $25
+00000000 (charst81.inc,36):                         _cA equ $26
+00000000 (charst81.inc,37):                         _cB equ $27
+00000000 (charst81.inc,38):                         _cC equ $28
+00000000 (charst81.inc,39):                         _cD equ $29
+00000000 (charst81.inc,40):                         _cE equ $2a
+00000000 (charst81.inc,41):                         _cF equ $2b
+00000000 (charst81.inc,42):                         _cG equ $2c
+00000000 (charst81.inc,43):                         _cH equ $2d
+00000000 (charst81.inc,44):                         _cI equ $2e
+00000000 (charst81.inc,45):                         _cJ equ $2f
+00000000 (charst81.inc,46):                         _cK equ $30
+00000000 (charst81.inc,47):                         _cL equ $31
+00000000 (charst81.inc,48):                         _cM equ $32
+00000000 (charst81.inc,49):                         _cN equ $33
+00000000 (charst81.inc,50):                         _cO equ $34
+00000000 (charst81.inc,51):                         _cP equ $35
+00000000 (charst81.inc,52):                         _cQ equ $36
+00000000 (charst81.inc,53):                         _cR equ $37
+00000000 (charst81.inc,54):                         _cS equ $38
+00000000 (charst81.inc,55):                         _cT equ $39
+00000000 (charst81.inc,56):                         _cU equ $3a
+00000000 (charst81.inc,57):                         _cV equ $3b
+00000000 (charst81.inc,58):                         _cW equ $3c
+00000000 (charst81.inc,59):                         _cX equ $3d
+00000000 (charst81.inc,60):                         _cY equ $3e
+00000000 (charst81.inc,61):                         _cZ equ $3f
+00000000 (charst81.inc,62):                         _i0 equ $9c
+00000000 (charst81.inc,63):                         _i1 equ $9d
+00000000 (charst81.inc,64):                         _i2 equ $9e
+00000000 (charst81.inc,65):                         _i3 equ $9f
+00000000 (charst81.inc,66):                         _i4 equ $A0
+00000000 (charst81.inc,67):                         _i5 equ $A1
+00000000 (charst81.inc,68):                         _i6 equ $A2
+00000000 (charst81.inc,69):                         _i7 equ $A3
+00000000 (charst81.inc,70):                         _i8 equ $A4
+00000000 (charst81.inc,71):                         _i9 equ $A5
+00000000 (charst81.inc,72):                         _iA equ $A6
+00000000 (charst81.inc,73):                         _iB equ $A7
+00000000 (charst81.inc,74):                         _iC equ $A8
+00000000 (charst81.inc,75):                         _iD equ $A9
+00000000 (charst81.inc,76):                         _iE equ $Aa
+00000000 (charst81.inc,77):                         _iF equ $Ab
+00000000 (charst81.inc,78):                         _iG equ $Ac
+00000000 (charst81.inc,79):                         _iH equ $Ad
+00000000 (charst81.inc,80):                         _iI equ $Ae
+00000000 (charst81.inc,81):                         _iJ equ $Af
+00000000 (charst81.inc,82):                         _iK equ $B0
+00000000 (charst81.inc,83):                         _iL equ $B1
+00000000 (charst81.inc,84):                         _iM equ $B2
+00000000 (charst81.inc,85):                         _iN equ $B3
+00000000 (charst81.inc,86):                         _iO equ $B4
+00000000 (charst81.inc,87):                         _iP equ $B5
+00000000 (charst81.inc,88):                         _iQ equ $B6
+00000000 (charst81.inc,89):                         _iR equ $B7
+00000000 (charst81.inc,90):                         _iS equ $B8
+00000000 (charst81.inc,91):                         _iT equ $B9
+00000000 (charst81.inc,92):                         _iU equ $Ba
+00000000 (charst81.inc,93):                         _iV equ $Bb
+00000000 (charst81.inc,94):                         _iW equ $Bc
+00000000 (charst81.inc,95):                         _iX equ $Bd
+00000000 (charst81.inc,96):                         _iY equ $Be
+00000000 (charst81.inc,97):                         _iZ equ $Bf
+00000000 (tokens81.inc,6):                         tk_RND equ 64
+00000000 (tokens81.inc,7):                         tk_INKEYS equ 65
+00000000 (tokens81.inc,8):                         tk_PI equ 66
+00000000 (tokens81.inc,9):                         tk_DBLQUOTE equ 192
+00000000 (tokens81.inc,10):                         tk_AT equ 193
+00000000 (tokens81.inc,11):                         tk_TAB equ 194
+00000000 (tokens81.inc,12):                         tk_CODE equ 196
+00000000 (tokens81.inc,13):                         tk_VAL equ 197
+00000000 (tokens81.inc,14):                         tk_LEN equ 198
+00000000 (tokens81.inc,15):                         tk_SIN equ 199
+00000000 (tokens81.inc,16):                         tk_COS equ 200
+00000000 (tokens81.inc,17):                         tk_TAN equ 201
+00000000 (tokens81.inc,18):                         tk_ASN equ 202
+00000000 (tokens81.inc,19):                         tk_ACS equ 203
+00000000 (tokens81.inc,20):                         tk_ATN equ 204
+00000000 (tokens81.inc,21):                         tk_LN equ 205
+00000000 (tokens81.inc,22):                         tk_EXP equ 206
+00000000 (tokens81.inc,23):                         tk_INT equ 207
+00000000 (tokens81.inc,24):                         tk_SQR equ 208
+00000000 (tokens81.inc,25):                         tk_SGN equ 209
+00000000 (tokens81.inc,26):                         tk_ABS equ 210
+00000000 (tokens81.inc,27):                         tk_PEEK equ 211
+00000000 (tokens81.inc,28):                         tk_USR equ 212
+00000000 (tokens81.inc,29):                         tk_STRS equ 213
+00000000 (tokens81.inc,30):                         tk_CHRS equ 214
+00000000 (tokens81.inc,31):                         tk_NOT equ 215
+00000000 (tokens81.inc,32):                         tk_STARSTAR equ 216
+00000000 (tokens81.inc,33):                         tk_OR equ 217
+00000000 (tokens81.inc,34):                         tk_AND equ 218
+00000000 (tokens81.inc,35):                         tk_LEQ equ 219
+00000000 (tokens81.inc,36):                         tk_GEQ equ 220
+00000000 (tokens81.inc,37):                         tk_NEQ equ 221
+00000000 (tokens81.inc,38):                         tk_THEN equ 222
+00000000 (tokens81.inc,39):                         tk_TO equ 223
+00000000 (tokens81.inc,40):                         tk_STEP equ 224
+00000000 (tokens81.inc,41):                         tk_LPRINT equ 225
+00000000 (tokens81.inc,42):                         tk_LLIST equ 226
+00000000 (tokens81.inc,43):                         tk_STOP equ 227
+00000000 (tokens81.inc,44):                         tk_SLOW equ 228
+00000000 (tokens81.inc,45):                         tk_FAST equ 229
+00000000 (tokens81.inc,46):                         tk_NEW equ 230
+00000000 (tokens81.inc,47):                         tk_SCROLL equ 231
+00000000 (tokens81.inc,48):                         tk_CONTINUE equ 232
+00000000 (tokens81.inc,49):                         tk_CONT equ 232
+00000000 (tokens81.inc,50):                         tk_DIM equ 233
+00000000 (tokens81.inc,51):                         tk_REM equ 234
+00000000 (tokens81.inc,52):                         tk_FOR equ 235
+00000000 (tokens81.inc,53):                         tk_GO_TO equ 236
+00000000 (tokens81.inc,54):                         tk_GO_SUB equ 237
+00000000 (tokens81.inc,55):                         tk_INPUT equ 238
+00000000 (tokens81.inc,56):                         tk_LOAD equ 239
+00000000 (tokens81.inc,57):                         tk_LIST equ 240
+00000000 (tokens81.inc,58):                         tk_LET equ 241
+00000000 (tokens81.inc,59):                         tk_PAUSE equ 242
+00000000 (tokens81.inc,60):                         tk_NEXT equ 243
+00000000 (tokens81.inc,61):                         tk_POKE equ 244
+00000000 (tokens81.inc,62):                         tk_PRINT equ 245
+00000000 (tokens81.inc,63):                         tk_PLOT equ 246
+00000000 (tokens81.inc,64):                         tk_RUN equ 247
+00000000 (tokens81.inc,65):                         tk_SAVE equ 248
+00000000 (tokens81.inc,66):                         tk_RANDOMIZE equ 249
+00000000 (tokens81.inc,67):                         tk_RAND equ 249
+00000000 (tokens81.inc,68):                         tk_IF equ 250
+00000000 (tokens81.inc,69):                         tk_CLS equ 251
+00000000 (tokens81.inc,70):                         tk_UNPLOT equ 252
+00000000 (tokens81.inc,71):                         tk_CLEAR equ 253
+00000000 (tokens81.inc,72):                         tk_RETURN equ 254
+00000000 (tokens81.inc,73):                         tk_COPY equ 255
+00004000 (simpleexamplezx81.asm,16):                         org $4000
+00004000 (simpleexamplezx81.asm,17):                         MEMORYSTART:
+00004000 (simpleexamplezx81.asm,18):                         MEMORY1KEND equ $4400
+00004000 (simpleexamplezx81.asm,21):                         ERR_NR equ $4000
+00004000 (simpleexamplezx81.asm,22):                         FLAGS equ $4001
+00004000 (simpleexamplezx81.asm,23):                         ERR_SP equ $4002
+00004000 (simpleexamplezx81.asm,24):                         RAMTOP equ $4004
+00004000 (simpleexamplezx81.asm,25):                         MODE equ $4006
+00004000 (simpleexamplezx81.asm,26):                         PPC equ $4007
+00004009 (simpleexamplezx81.asm,28):                         org $4009
+00004009 (simpleexamplezx81.asm,30): 01                      VERSN db $01
+0000400A (simpleexamplezx81.asm,31): 01 00                   E_PPC dw $01
+0000400C (simpleexamplezx81.asm,32): 55 40                   D_FILE dw dfile
+0000400E (simpleexamplezx81.asm,33): 01 01                   DF_CC dw $0101
+00004010 (simpleexamplezx81.asm,34): 01 01                   VARS dw $0101
+00004012 (simpleexamplezx81.asm,35): 01 01                   DEST dw $0101
+00004014 (simpleexamplezx81.asm,36): 7D 40                   E_LINE dw eline
+00004016 (simpleexamplezx81.asm,37): 75 40                   CH_ADD dw line1a4
+00004018 (simpleexamplezx81.asm,38): 7D 40                   X_PTR dw eline
+0000401A (simpleexamplezx81.asm,39): 7D 40                   STKBOT dw eline
+0000401C (simpleexamplezx81.asm,40): 7D 40                   STKEND dw eline
+0000401E (simpleexamplezx81.asm,41): 00                      BERG db 0
+0000401F (simpleexamplezx81.asm,42): 75 40                   MEM dw line1a4
+00004021 (simpleexamplezx81.asm,43): 01                      NOTUSED db $01
+00004022 (simpleexamplezx81.asm,44): 01                      DF_SZ db $01
+00004023 (simpleexamplezx81.asm,45): 01 01                   S_TOP dw $0101
+00004025 (simpleexamplezx81.asm,46):                         LAST_K:
+00004025 (simpleexamplezx81.asm,47): FF                      .row db $FF
+00004026 (simpleexamplezx81.asm,48): FF                      .column db $FF
+00004027 (simpleexamplezx81.asm,49): FF                      DB_ST db $FF
+00004028 (simpleexamplezx81.asm,50): 37                      MARGIN db 55
+00004029 (simpleexamplezx81.asm,51): 71 40                   NXTLIN dw line1a4 - 4
+0000402B (simpleexamplezx81.asm,52): 01 01                   OLDPPC dw $0101
+0000402D (simpleexamplezx81.asm,53): 01                      FLAGX db $01
+0000402E (simpleexamplezx81.asm,54): 01 01                   STRLEN dw $0101
+00004030 (simpleexamplezx81.asm,55): 01 01                   T_ADDR dw $0101
+00004032 (simpleexamplezx81.asm,56): 01 01                   SEED dw $0101
+00004034 (simpleexamplezx81.asm,57): FF FF                   FRAMES db $FF,$FF
+00004036 (simpleexamplezx81.asm,58): 01 01                   COORDS db $01,$01
+00004038 (simpleexamplezx81.asm,59): 01                      PR_CC db $01
+00004039 (simpleexamplezx81.asm,60): 01 01                   S_POSN db $01,$01
+0000403B (simpleexamplezx81.asm,61): 40                      CDFLAG db 01000000B
+0000403C (simpleexamplezx81.asm,63):                         assert $ eq $403c
+0000403C (simpleexamplezx81.asm,79):                         maincycle:
+0000403C (simpleexamplezx81.asm,81): 3A 25 40                ld a,(LAST_K)
+0000403F (simpleexamplezx81.asm,82): 3C                      inc a
+00004040 (simpleexamplezx81.asm,83): 20 FA                   jr nz,maincycle
+00004042 (simpleexamplezx81.asm,85):                         gotkey:
+00004042 (simpleexamplezx81.asm,86): ED 4B 25 40             ld bc,(LAST_K)
+00004046 (simpleexamplezx81.asm,87): 79                      ld a,c
+00004047 (simpleexamplezx81.asm,88): 3C                      inc a
+00004048 (simpleexamplezx81.asm,89): 28 F8                   jr z,gotkey
+0000404A (simpleexamplezx81.asm,90): CD BD 07                call DECODEKEY
+0000404D (simpleexamplezx81.asm,91): 30 F3                   jr nc,gotkey
+0000404F (simpleexamplezx81.asm,92): 7E                      ld a,(hl)
+00004050 (simpleexamplezx81.asm,94): 32 56 40                ld (chardisplay),a
+00004053 (simpleexamplezx81.asm,96): 18 E7                   jrp maincycle
+00004055 (simpleexamplezx81.asm,99):                         dfile:
+00004055 (simpleexamplezx81.asm,100): 76                      db $76
+00004056 (simpleexamplezx81.asm,101): BD                      chardisplay: db _iX
+00004057 (simpleexamplezx81.asm,102): 76 76 76 76 76 76 76 76 
+          76 76 76 76 76 76 76 76 
+          76 76 76 76 76 76 76 76 db 24 dup($76)
+0000406F (simpleexamplezx81.asm,103): 76                      db $76
+00004070 (simpleexamplezx81.asm,113):                         maxstackavailable:
+00004070 (simpleexamplezx81.asm,119):                         system_init:
+00004070 (simpleexamplezx81.asm,122): 31 00 44                ld sp,MEMORY1KEND
+00004073 (simpleexamplezx81.asm,139): 18 C7                   jrp maincycle
+00004075 (simpleexamplezx81.asm,150):                         line1a4:
+00004075 (simpleexamplezx81.asm,151): F9 D4                   db $F9,$D4
+00004077 (simpleexamplezx81.asm,153): 1C 7E                   db $1c,$7e
+00004079 (simpleexamplezx81.asm,154): 8F                      db $8f
+0000407A (simpleexamplezx81.asm,155):                         STARTING_ADDRESS = system_init
+0000407A (simpleexamplezx81.asm,156):                         MANTISSA1 = (STARTING_ADDRESS-16384)/128
+0000407A (simpleexamplezx81.asm,157): 00                      db MANTISSA1
+0000407B (simpleexamplezx81.asm,158): E0                      db (STARTING_ADDRESS-16384)*2-MANTISSA1*256
+0000407C (simpleexamplezx81.asm,166):                         line1end:
+0000407C (simpleexamplezx81.asm,168):                         vars2:
+0000407C (simpleexamplezx81.asm,169): 80                      db $80
+0000407D (simpleexamplezx81.asm,170):                         end_vars:
+0000407D (simpleexamplezx81.asm,172):                         eline:
+0000407D (simpleexamplezx81.asm,174):                         endoftape:
+0000407D (simpleexamplezx81.asm,178):                         total_lenght = $ - MEMORYSTART
+0000407D (simpleexamplezx81.asm,179):                         displayindecimal 'Total lenght', total_lenght
+0000407D (simpleexamplezx81.asm,180):                         assert total_lenght <= 958
+
+2 passes, 0.7 seconds, 116 bytes.

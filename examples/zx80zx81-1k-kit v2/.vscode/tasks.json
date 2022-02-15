@@ -1,0 +1,11 @@
+{
+    // fasmg ez80 compilation of simpleexamplezx81.asm
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "fasmg ez80",
+            "type": "shell",
+            "command": "./compile-simpleexamplezx81.sh"
+        }
+    ]
+}

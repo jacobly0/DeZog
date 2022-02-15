@@ -1,0 +1,265 @@
+
+# file opened: simpleexamplezx81.asm
+# file opened: romadd81.inc
+   6+  0000              SCANKEYB equ $02BB
+  37+  0000              ROMPAUSE equ $0F35
+  39+  0000              RESET equ $0000
+  40+  0000              SLOWFAST equ $0207
+  41+  0000              SETFAST equ $02E7
+  42+  0000              NEXTLINE equ $0676
+  43+  0000              DECODEKEY equ $07bd
+  44+  0000              PRINTAT equ $08f5
+  45+  0000              MAKEROOM equ $099e
+  46+  0000              CLS equ $0a2a
+  47+  0000              STACK2BC equ $0bf5
+  48+  0000              STACK2A equ $0c02
+  49+  0000              CLASS6 equ $0d92
+  50+  0000              FINDINT equ $0ea7
+  51+  0000              FAST equ $0f23
+  52+  0000              SLOW equ $0f2b
+  53+  0000              DEBOUNCE equ $0f4b
+  54+  0000              SETMIN equ $14BC
+# file closed: romadd81.inc
+# file opened: charst81.inc
+  11+  0000              ___ equ $00
+  12+  0000              _c_ equ $00
+  13+  0000              _QT equ $0B
+  14+  0000              _CL equ $0e
+  15+  0000              _OB equ $10
+  16+  0000              _CB equ $11
+  17+  0000              _GT equ $12
+  18+  0000              _LT equ $13
+  19+  0000              _EQ equ $14
+  20+  0000              _iEQ equ $94
+  21+  0000              _PL equ $15
+  22+  0000              _MN equ $16
+  23+  0000              _FS equ $18
+  24+  0000              _SC equ $19
+  25+  0000              _DT equ $1b
+  26+  0000              _c0 equ $1c
+  27+  0000              _c1 equ $1d
+  28+  0000              _c2 equ $1e
+  29+  0000              _c3 equ $1f
+  30+  0000              _c4 equ $20
+  31+  0000              _c5 equ $21
+  32+  0000              _c6 equ $22
+  33+  0000              _c7 equ $23
+  34+  0000              _c8 equ $24
+  35+  0000              _c9 equ $25
+  36+  0000              _cA equ $26
+  37+  0000              _cB equ $27
+  38+  0000              _cC equ $28
+  39+  0000              _cD equ $29
+  40+  0000              _cE equ $2a
+  41+  0000              _cF equ $2b
+  42+  0000              _cG equ $2c
+  43+  0000              _cH equ $2d
+  44+  0000              _cI equ $2e
+  45+  0000              _cJ equ $2f
+  46+  0000              _cK equ $30
+  47+  0000              _cL equ $31
+  48+  0000              _cM equ $32
+  49+  0000              _cN equ $33
+  50+  0000              _cO equ $34
+  51+  0000              _cP equ $35
+  52+  0000              _cQ equ $36
+  53+  0000              _cR equ $37
+  54+  0000              _cS equ $38
+  55+  0000              _cT equ $39
+  56+  0000              _cU equ $3a
+  57+  0000              _cV equ $3b
+  58+  0000              _cW equ $3c
+  59+  0000              _cX equ $3d
+  60+  0000              _cY equ $3e
+  61+  0000              _cZ equ $3f
+  62+  0000              _i0 equ $9c
+  63+  0000              _i1 equ $9d
+  64+  0000              _i2 equ $9e
+  65+  0000              _i3 equ $9f
+  66+  0000              _i4 equ $A0
+  67+  0000              _i5 equ $A1
+  68+  0000              _i6 equ $A2
+  69+  0000              _i7 equ $A3
+  70+  0000              _i8 equ $A4
+  71+  0000              _i9 equ $A5
+  72+  0000              _iA equ $A6
+  73+  0000              _iB equ $A7
+  74+  0000              _iC equ $A8
+  75+  0000              _iD equ $A9
+  76+  0000              _iE equ $Aa
+  77+  0000              _iF equ $Ab
+  78+  0000              _iG equ $Ac
+  79+  0000              _iH equ $Ad
+  80+  0000              _iI equ $Ae
+  81+  0000              _iJ equ $Af
+  82+  0000              _iK equ $B0
+  83+  0000              _iL equ $B1
+  84+  0000              _iM equ $B2
+  85+  0000              _iN equ $B3
+  86+  0000              _iO equ $B4
+  87+  0000              _iP equ $B5
+  88+  0000              _iQ equ $B6
+  89+  0000              _iR equ $B7
+  90+  0000              _iS equ $B8
+  91+  0000              _iT equ $B9
+  92+  0000              _iU equ $Ba
+  93+  0000              _iV equ $Bb
+  94+  0000              _iW equ $Bc
+  95+  0000              _iX equ $Bd
+  96+  0000              _iY equ $Be
+  97+  0000              _iZ equ $Bf
+# file closed: charst81.inc
+# file opened: tokens81.inc
+   6+  0000              tk_RND equ 64
+   7+  0000              tk_INKEYS equ 65
+   8+  0000              tk_PI equ 66
+   9+  0000              tk_DBLQUOTE equ 192
+  10+  0000              tk_AT equ 193
+  11+  0000              tk_TAB equ 194
+  12+  0000              tk_CODE equ 196
+  13+  0000              tk_VAL equ 197
+  14+  0000              tk_LEN equ 198
+  15+  0000              tk_SIN equ 199
+  16+  0000              tk_COS equ 200
+  17+  0000              tk_TAN equ 201
+  18+  0000              tk_ASN equ 202
+  19+  0000              tk_ACS equ 203
+  20+  0000              tk_ATN equ 204
+  21+  0000              tk_LN equ 205
+  22+  0000              tk_EXP equ 206
+  23+  0000              tk_INT equ 207
+  24+  0000              tk_SQR equ 208
+  25+  0000              tk_SGN equ 209
+  26+  0000              tk_ABS equ 210
+  27+  0000              tk_PEEK equ 211
+  28+  0000              tk_USR equ 212
+  29+  0000              tk_STRS equ 213
+  30+  0000              tk_CHRS equ 214
+  31+  0000              tk_NOT equ 215
+  32+  0000              tk_STARSTAR equ 216
+  33+  0000              tk_OR equ 217
+  34+  0000              tk_AND equ 218
+  35+  0000              tk_LEQ equ 219
+  36+  0000              tk_GEQ equ 220
+  37+  0000              tk_NEQ equ 221
+  38+  0000              tk_THEN equ 222
+  39+  0000              tk_TO equ 223
+  40+  0000              tk_STEP equ 224
+  41+  0000              tk_LPRINT equ 225
+  42+  0000              tk_LLIST equ 226
+  43+  0000              tk_STOP equ 227
+  44+  0000              tk_SLOW equ 228
+  45+  0000              tk_FAST equ 229
+  46+  0000              tk_NEW equ 230
+  47+  0000              tk_SCROLL equ 231
+  48+  0000              tk_CONTINUE equ 232
+  49+  0000              tk_CONT equ 232
+  50+  0000              tk_DIM equ 233
+  51+  0000              tk_REM equ 234
+  52+  0000              tk_FOR equ 235
+  53+  0000              tk_GO_TO equ 236
+  54+  0000              tk_GO_SUB equ 237
+  55+  0000              tk_INPUT equ 238
+  56+  0000              tk_LOAD equ 239
+  57+  0000              tk_LIST equ 240
+  58+  0000              tk_LET equ 241
+  59+  0000              tk_PAUSE equ 242
+  60+  0000              tk_NEXT equ 243
+  61+  0000              tk_POKE equ 244
+  62+  0000              tk_PRINT equ 245
+  63+  0000              tk_PLOT equ 246
+  64+  0000              tk_RUN equ 247
+  65+  0000              tk_SAVE equ 248
+  66+  0000              tk_RANDOMIZE equ 249
+  67+  0000              tk_RAND equ 249
+  68+  0000              tk_IF equ 250
+  69+  0000              tk_CLS equ 251
+  70+  0000              tk_UNPLOT equ 252
+  71+  0000              tk_CLEAR equ 253
+  72+  0000              tk_RETURN equ 254
+  73+  0000              tk_COPY equ 255
+# file closed: tokens81.inc
+  16   4000              org $4000
+  17   4000              MEMORYSTART:
+  18   4000              MEMORY1KEND equ $4400
+  21   4000              ERR_NR equ $4000
+  22   4000              FLAGS equ $4001
+  23   4000              ERR_SP equ $4002
+  24   4000              RAMTOP equ $4004
+  25   4000              MODE equ $4006
+  26   4000              PPC equ $4007
+  28   4009              org $4009
+  30   4009              VERSN db $01
+  31   400A              E_PPC dw $01
+  32   400C              D_FILE dw dfile
+  33   400E              DF_CC dw $0101
+  34   4010              VARS dw $0101
+  35   4012              DEST dw $0101
+  36   4014              E_LINE dw eline
+  37   4016              CH_ADD dw line1a4
+  38   4018              X_PTR dw eline
+  39   401A              STKBOT dw eline
+  40   401C              STKEND dw eline
+  41   401E              BERG db 0
+  42   401F              MEM dw line1a4
+  43   4021              NOTUSED db $01
+  44   4022              DF_SZ db $01
+  45   4023              S_TOP dw $0101
+  46   4025              LAST_K:
+  47   4025              .row db $FF
+  48   4026              .column db $FF
+  49   4027              DB_ST db $FF
+  50   4028              MARGIN db 55
+  51   4029              NXTLIN dw line1a4 - 4
+  52   402B              OLDPPC dw $0101
+  53   402D              FLAGX db $01
+  54   402E              STRLEN dw $0101
+  55   4030              T_ADDR dw $0101
+  56   4032              SEED dw $0101
+  57   4034              FRAMES db $FF,$FF
+  58   4036              COORDS db $01,$01
+  59   4038              PR_CC db $01
+  60   4039              S_POSN db $01,$01
+  61   403B              CDFLAG db 01000000B
+  63   403C              assert $ eq $403c
+  79   403C              maincycle:
+  81   403C              ld a,(LAST_K)
+  82   403F              inc a
+  83   4040              jr nz,maincycle
+  85   4042              gotkey:
+  86   4042              ld bc,(LAST_K)
+  87   4046              ld a,c
+  88   4047              inc a
+  89   4048              jr z,gotkey
+  90   404A              call DECODEKEY
+  91   404D              jr nc,gotkey
+  92   404F              ld a,(hl)
+  94   4050              ld (chardisplay),a
+  96   4053              jrp maincycle
+  99   4055              dfile:
+ 100   4055              db $76
+ 101   4056              chardisplay: db _iX
+ 102   4057              db 24 dup($76)
+ 103   406F              db $76
+ 113   4070              maxstackavailable:
+ 119   4070              system_init:
+ 122   4070              ld sp,MEMORY1KEND
+ 139   4073              jrp maincycle
+ 150   4075              line1a4:
+ 151   4075              db $F9,$D4
+ 153   4077              db $1c,$7e
+ 154   4079              db $8f
+ 155   407A              STARTING_ADDRESS = system_init
+ 156   407A              MANTISSA1 = (STARTING_ADDRESS-16384)/128
+ 157   407A              db MANTISSA1
+ 158   407B              db (STARTING_ADDRESS-16384)*2-MANTISSA1*256
+ 166   407C              line1end:
+ 168   407C              vars2:
+ 169   407C              db $80
+ 170   407D              end_vars:
+ 172   407D              eline:
+ 174   407D              endoftape:
+ 178   407D              total_lenght = $ - MEMORYSTART
+ 179   407D              displayindecimal 'Total lenght', total_lenght
+ 180   407D              assert total_lenght <= 958
+# file closed: simpleexamplezx81.asm

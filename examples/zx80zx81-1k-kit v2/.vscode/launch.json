@@ -1,0 +1,36 @@
+// vscode-DeZog configuration file
+
+{
+    "version": "0.2.0",
+    "configurations": [
+    {
+        "type": "dezog",
+        "request": "launch",
+        "name": "DeZog",
+        "remoteType": "zrcp",
+        "zrcp": {
+            "port": 10000
+        },
+        "sjasmplus": [
+            {
+                "path": "simpleexamplezx81.list",
+            }
+        ],
+        "startAutomatically": false,
+        "history": {
+            "reverseDebugInstructionCount": 10000,
+            "codeCoverageEnabled": true
+        },
+        "commandsAfterLaunch": [],
+        "disassemblerArgs": {
+            "numberOfLines": 20,
+            "esxdosRst": true
+        },
+        "rootFolder": "${workspaceFolder}",
+        "topOfStack": "MEMORY1KEND",
+        "load": "simpleexamplezx81.p",
+        "smallValuesMaximum": 513,
+        "tmpDir": ".tmp"
+    }
+    ]
+}

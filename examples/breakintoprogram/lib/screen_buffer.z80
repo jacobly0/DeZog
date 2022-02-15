@@ -1,0 +1,147 @@
+;
+; Title:	ZX Spectrum Screen Buffer Routines
+; Author:	Dean Belfield
+; Created:	20/08/2011
+; Last Updated:	11/04/2020
+;
+; Requires:
+;
+; Modinfo:
+;
+; 04/07/2012:	Added Clear_Screen and Clear_Screen_Fast routines
+; 08/02/2020:	Moved Clear_Screen to output.z80
+; 10/04/2020:	Added Get_Pixel_Address_B
+;		Fixed Copy_Screen to copy entire screen width, not just half a screen
+; 11/04/2020:	Get_Pixel_Address_B now only compiled if SCREEN_BUFFER is declared
+;
+
+; Get screen address (based upon a 32x192 byte buffer where each pixel row is 32 bytes below the previous)
+; Functionally equivalent to Get_Pixel_Address in output.z80 that deals with the Spectrum screen memory
+; B = Y pixel position
+; C = X pixel position
+; Returns address in HL and pixel position within character in A
+;
+			IFDEF SCREEN_BUFFER
+Get_Pixel_Address_B:	LD L,B				; Calculate Y2,Y1,Y0
+			LD H,0
+			DUP 5
+			ADD HL,HL
+			EDUP
+			LD A,high SCREEN_BUFFER
+			ADD A,H
+			LD H,A
+			LD A,C				; Calculate X4,X3,X2,X1,X0
+			RRA				; Shift into position
+			RRA
+			RRA
+			AND %00011111			; Mask out unwanted bits
+			OR L				; OR with Y5,Y4,Y3
+			LD L,A				; Store in L
+			LD A,C
+			AND 7
+			RET
+			ENDIF
+
+; Fast clear-screen routine
+; Uses the stack to block clear memory
+; HL: Address of screen buffer
+;
+Clear_Screen_Fast:	LD (Clear_Screen_Fast_End+1),SP	; Store the stack (self modding code)
+			LD DE,0x1800
+			ADD HL,DE			; Move to end of buffer
+			LD SP,HL			; Set stack to pointer
+			LD DE,0				; We are clearing, so set DE to 0
+			LD B,128			; We loop 128 times - 24 words * 128 = 6144 bytes
+1:			DUP 24
+			PUSH DE
+			EDUP
+			DJNZ 1B
+Clear_Screen_Fast_End:	LD SP,0x0000			; Restore the stack
+			RET
+
+; A voodoo screen buffer routine that uses the stack to quickly shift bytes around
+; HL: Location of offscreen buffer
+;
+Copy_Screen:		LD (Copy_Screen_End+1),SP 	; This is some self-modifying code; stores the stack pointer in an LD SP,nn instruction at the end
+			EXX				; Switch to alternate registers
+			LD HL,0x4000            	; HL' = screen pointer
+1:			LD (Copy_Screen_HL1+1), HL	; Store the screen position for later
+			EXX				; Switch to normal registers
+
+			LD SP,HL			; HL = Buffer address
+			POP AF				; Fetch the data
+			POP BC
+			POP DE
+			POP IX
+			EXX				; Switch to alternate registers
+			EX AF,AF'
+			LD DE,16
+			ADD HL,DE			; Add Offset for screen
+			POP AF
+			POP BC
+			POP DE
+			POP IY
+			LD (Copy_Screen_SP1+1),SP	; Save the current buffer address for later
+			LD SP,HL			; The screen address
+			PUSH IY				; Push the data
+			PUSH DE
+			PUSH BC
+			PUSH AF
+			EX AF,AF'			; Switch to normal registers
+			EXX
+			PUSH IX
+			PUSH DE
+			PUSH BC
+			PUSH AF
+Copy_Screen_SP1:	LD HL,0				; HL = Buffer
+
+			LD SP,HL			; HL = Buffer address
+			POP AF				; Fetch the data
+			POP BC
+			POP DE
+			POP IX
+			EXX				; Switch to alternate registers
+			EX AF,AF'
+			LD DE,16
+			ADD HL,DE			; Add Offset for screen
+			POP AF
+			POP BC
+			POP DE
+			POP IY
+			LD (Copy_Screen_SP2+1),SP	; Save the current buffer address for later
+			LD SP,HL			; The screen address
+			PUSH IY				; Push the data
+			PUSH DE
+			PUSH BC
+			PUSH AF
+			EX AF,AF'			; Switch to normal registers
+			EXX
+			PUSH IX
+			PUSH DE
+			PUSH BC
+			PUSH AF
+Copy_Screen_SP2:	LD HL,0				; HL = Buffer
+
+			EXX				; Switch to alternate registers
+Copy_Screen_HL1:	LD HL,0				; HL' = Screen 
+			INC H				; Drop down 1 pixel row in screen memory
+			LD A,H				; Check whether we've gone past a character boundary
+			AND 0x07
+			JR NZ,1B			
+			LD A,H				; Go to the next character line
+			SUB 8
+			LD H,A
+			ld A,L
+			ADD A,32
+			LD L,A
+			JR NC,1B			; Check for next third
+			LD A,H				; Go to next third
+			ADD A,8
+			LD H,A
+			CP 0x58				; Check for end of screen memory
+			JR NZ,1B			; Loop back if not reached
+
+Copy_Screen_End:	LD SP,0				; Restore the SP
+			EXX				; Switch to normal registers
+			RET
+
