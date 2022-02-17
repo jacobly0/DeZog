@@ -4,13 +4,13 @@
 ; to be compiled with fasmg
 
 ; compilation utils
-include 'ez80.inc'       ; Z80 instructions
+include 'includes/ez80.inc'       ; Z80 instructions
 assume adl = 0           ; no ez80 extended instructions (but simple z80 ones)
-include 'fasmgutils.inc' ; listing etc.
-include 'z80optmc.inc'   ; jrp etc.
-include 'romadd81.inc'
-include 'charst81.inc'
-include 'tokens81.inc'
+include 'includes/fasmgutils.inc' ; listing etc.
+include 'includes/z80optmc.inc'   ; jrp etc.
+include 'includes/romadd81.inc'
+include 'includes/charst81.inc'
+include 'includes/tokens81.inc'
 
 
 org $4000
@@ -80,7 +80,7 @@ maincycle:
 
     ld a,(LAST_K)
     inc a
-    jr nz,maincycle
+    jrp nz,maincycle ; MACRO that is using JR if inside jump limits, else JP
 
 gotkey:
     ld bc,(LAST_K)
