@@ -35,7 +35,7 @@ def checkhex(value):
     
 def main():
 
-    if True: # False for debugging
+    if False: # False for debugging
         # Check and retrieve command-line arguments
         if len(sys.argv) != 3:
             print(__doc__)
@@ -43,8 +43,8 @@ def main():
         fileIn  = sys.argv[1]
         fileOut = sys.argv[2]
     else:
-        fileIn  = "1kRealChessZX81-24-F-debug13-DBGOUT53.lst"
-        fileOut = "1kRealChessZX81-24-F-debug13-DBGOUT53.sld"
+        fileIn  = "simpleexamplezx81.lst"
+        fileOut = "simpleexamplezx81.sld"
 
     currentFilename = [""]*10
 

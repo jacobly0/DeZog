@@ -14,7 +14,7 @@ end macro
 
 define Listing
 
-define ldisplay 13,10,10,'LISTING',13,10,10
+define ldisplay 13,10,10,'LISTING ',__source__,' (by ',__file__,')',13,10,10
 
 macro ldisplay args&
     local str
