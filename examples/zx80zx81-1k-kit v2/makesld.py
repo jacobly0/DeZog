@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+"""
+Transform a fasmg-ez80 lst output in a "DeZog" list compatible one
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Usage: makesld <src.lst> <dest.sld>
+"""
+
+import sys
+import os
+import re
+import string  
+
+"""
+    "sld" recognized format:
+    a. CSV file with fields are separated by |
+    b. one single list file is used to specify multiple sources (included)
+       <source file>|<src line>|<definition file>|<def line>|<page>|<value>|<type>|<data>
+          1. source file is the main one on all the lines
+          2. source line (will stay fixed during include processing)
+          3. include file if the actual line is inside one
+          4. include file source line if any
+          5. page, always 0 for now
+          6. memory adreess of label or instruction
+          7. T for instruction Trace, L for Label
+          8. empty for T, for L list of labels (module name, main label, local label separated by commas)
+"""
+     
+# Function checks if input string has only hexdigits or not  
+def checkhex(value):  
+    for letter in value:  
+        if letter not in string.hexdigits:  
+            return False
+    return True
+    
+def main():
+
+    if True: # False for debugging
+        # Check and retrieve command-line arguments
+        if len(sys.argv) != 3:
+            print(__doc__)
+            sys.exit(1)   # Return a non-zero value to indicate abnormal termination
+        fileIn  = sys.argv[1]
+        fileOut = sys.argv[2]
+    else:
+        fileIn  = "1kRealChessZX81-24-F-debug13-DBGOUT53.lst"
+        fileOut = "1kRealChessZX81-24-F-debug13-DBGOUT53.sld"
+
+    currentFilename = [""]*10
+
+    # Verify source file
+    if not os.path.isfile(fileIn):
+        print("error: {} does not exist".format(fileIn))
+        sys.exit(1)
+
+    # Process the file line-by-line
+    with open(fileIn, 'r') as fpIn, open(fileOut, 'w') as fpOut:
+        fpOut.write("|SLD.data.version|1\n")
+        fpOut.write("||K|KEYWORDS|WPMEM,LOGPOINT,ASSERTION\n")
+        status="Waiting for LISTING"
+        #prevaddress = -1
+        for line in fpIn:
+
+            line = line.rstrip()
+            instructionline = False
+            codetext = ""
+
+            if status=="Waiting for LISTING":
+
+                if line.startswith("LISTING "):
+                    mainfile = line.split("(")[0][8:].strip()
+                    fpOut.write(f"{mainfile}|-1||0|-1|-1|Z|pages.size:0,pages.count:0,slots.count:0\n")
+                    mainsourceline = -1
+                    status = "Code"
+
+            elif status=="Code":
+
+                if line=="":
+                    continue
+
+                elif line.find("passes,")>=0 and line.find("seconds")>0 and line.find("bytes.")>0:
+                    status="End"
+
+                elif checkhex(line[0:8]):
+                    address = int(line[4:8],16)
+                    filename, linenumber = line[10:line.find(")")].split(",")
+                    linenumber = int(linenumber)
+                    codetext = line[line.find(":")+25:]
+                    if filename==mainfile:
+                        mainsourceline = linenumber
+                        filename, linenumber = "", ""
+                    instructionline = True
+
+                elif line[0:8].isspace():
+                    # a continuation of a code line 
+                    codetext = line[9+24:]
+                    instructionline = True # generate double addresses
+
+                else:
+                    print("unknown error in line reading")
+                    sys.exit(1)
+
+                codetext = codetext.strip()
+
+                if instructionline and mainsourceline>=0 and address>0:
+                    fpOut.write(f"{mainfile}|{mainsourceline}|{filename}|{linenumber}|0|{address}|T|{codetext}\n")                
+
+                if codetext.upper().find(" EQU ")>0:
+                    label, labelvalue = re.split(" EQU | equ | Equ ",codetext)
+                elif codetext.upper().find("=")>0:
+                    if not codetext.upper().find("ASSERT ")>=0:
+                        label, labelvalue = codetext.split("=")
+                        label, labelvalue = label.strip(), labelvalue.strip()
+                elif codetext.upper().find(":")>0:
+                    label = codetext.split(":")[0]
+                    labelvalue = address
+                elif codetext.upper().find(" DW")>0:
+                    label = re.split(" DW| dw| Dw", codetext)[0]
+                    labelvalue = address
+                elif codetext.upper().find(" DB")>0:
+                    label = re.split(" DB| db| Db", codetext)[0]
+                    labelvalue = address
+                else:
+                    label = ""
+
+                if label:
+                    if not isinstance(labelvalue, int):
+                        if labelvalue.upper().find("H")>0:
+                            try:
+                                labelvalue = int(labelvalue.upper().replace("H",""),16)
+                            except:
+                                labelvalue = 0 # formula still not implemented...
+                        elif labelvalue.upper().find("0X")>=0:
+                            try:
+                                labelvalue = int(labelvalue.upper().replace("0X",""),16)
+                            except:
+                                labelvalue = 0 # formula still not implemented...
+                        elif labelvalue.find("$")>=0:
+                            try:
+                                labelvalue = int(labelvalue.replace("$",""),16)
+                            except:
+                                labelvalue = 0 # formula still not implemented...
+                        elif labelvalue.upper().find("B")>0:
+                            raise ValueError(" still to implement binary!! ")
+                        else:
+                            try:
+                                labelvalue = int(labelvalue)
+                            except:
+                                labelvalue = 0 # formula still not implemented...
+                    fpOut.write(f"{mainfile}|{mainsourceline}|{filename}|{linenumber}|0|{labelvalue}|L|,{label},,\n")
+
+if __name__ == '__main__':
+    main()
