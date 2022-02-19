@@ -28,7 +28,7 @@
             "loadObjs": [
                 { "path": "${fileDirname}/${fileBasenameNoExtension}.p", "start": "0x4009" },
             ],
-            "startAutomatically": true,
+            "startAutomatically": false,
             "preLaunchTask": "compilewithfasmg"
         }
     ]

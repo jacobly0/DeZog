@@ -174,143 +174,99 @@ simpleexamplezx81.asm|-1|includes/tokens81.inc|70|0|252|L|,tk_UNPLOT,,
 simpleexamplezx81.asm|-1|includes/tokens81.inc|71|0|253|L|,tk_CLEAR,,
 simpleexamplezx81.asm|-1|includes/tokens81.inc|72|0|254|L|,tk_RETURN,,
 simpleexamplezx81.asm|-1|includes/tokens81.inc|73|0|255|L|,tk_COPY,,
-simpleexamplezx81.asm|16|||0|16384|T|org $4000
-simpleexamplezx81.asm|17|||0|16384|T|MEMORYSTART:
-simpleexamplezx81.asm|17|||0|16384|L|,MEMORYSTART,,
-simpleexamplezx81.asm|18|||0|16384|T|MEMORY1KEND equ $4400
-simpleexamplezx81.asm|18|||0|17408|L|,MEMORY1KEND,,
-simpleexamplezx81.asm|21|||0|16384|T|ERR_NR equ $4000
-simpleexamplezx81.asm|21|||0|16384|L|,ERR_NR,,
-simpleexamplezx81.asm|22|||0|16384|T|FLAGS equ $4001
-simpleexamplezx81.asm|22|||0|16385|L|,FLAGS,,
-simpleexamplezx81.asm|23|||0|16384|T|ERR_SP equ $4002
-simpleexamplezx81.asm|23|||0|16386|L|,ERR_SP,,
-simpleexamplezx81.asm|24|||0|16384|T|RAMTOP equ $4004
-simpleexamplezx81.asm|24|||0|16388|L|,RAMTOP,,
-simpleexamplezx81.asm|25|||0|16384|T|MODE equ $4006
-simpleexamplezx81.asm|25|||0|16390|L|,MODE,,
-simpleexamplezx81.asm|26|||0|16384|T|PPC equ $4007
-simpleexamplezx81.asm|26|||0|16391|L|,PPC,,
-simpleexamplezx81.asm|28|||0|16393|T|org $4009
-simpleexamplezx81.asm|30|||0|16393|T|VERSN db $01
-simpleexamplezx81.asm|30|||0|16393|L|,VERSN,,
-simpleexamplezx81.asm|31|||0|16394|T|E_PPC dw $01
-simpleexamplezx81.asm|31|||0|16394|L|,E_PPC,,
-simpleexamplezx81.asm|32|||0|16396|T|D_FILE dw dfile
-simpleexamplezx81.asm|32|||0|16396|L|,D_FILE,,
-simpleexamplezx81.asm|33|||0|16398|T|DF_CC dw $0101
-simpleexamplezx81.asm|33|||0|16398|L|,DF_CC,,
-simpleexamplezx81.asm|34|||0|16400|T|VARS dw $0101
-simpleexamplezx81.asm|34|||0|16400|L|,VARS,,
-simpleexamplezx81.asm|35|||0|16402|T|DEST dw $0101
-simpleexamplezx81.asm|35|||0|16402|L|,DEST,,
-simpleexamplezx81.asm|36|||0|16404|T|E_LINE dw eline
-simpleexamplezx81.asm|36|||0|16404|L|,E_LINE,,
-simpleexamplezx81.asm|37|||0|16406|T|CH_ADD dw line1a4
-simpleexamplezx81.asm|37|||0|16406|L|,CH_ADD,,
-simpleexamplezx81.asm|38|||0|16408|T|X_PTR dw eline
-simpleexamplezx81.asm|38|||0|16408|L|,X_PTR,,
-simpleexamplezx81.asm|39|||0|16410|T|STKBOT dw eline
-simpleexamplezx81.asm|39|||0|16410|L|,STKBOT,,
-simpleexamplezx81.asm|40|||0|16412|T|STKEND dw eline
-simpleexamplezx81.asm|40|||0|16412|L|,STKEND,,
-simpleexamplezx81.asm|41|||0|16414|T|BERG db 0
-simpleexamplezx81.asm|41|||0|16414|L|,BERG,,
-simpleexamplezx81.asm|42|||0|16415|T|MEM dw line1a4
-simpleexamplezx81.asm|42|||0|16415|L|,MEM,,
-simpleexamplezx81.asm|43|||0|16417|T|NOTUSED db $01
-simpleexamplezx81.asm|43|||0|16417|L|,NOTUSED,,
-simpleexamplezx81.asm|44|||0|16418|T|DF_SZ db $01
-simpleexamplezx81.asm|44|||0|16418|L|,DF_SZ,,
-simpleexamplezx81.asm|45|||0|16419|T|S_TOP dw $0101
-simpleexamplezx81.asm|45|||0|16419|L|,S_TOP,,
-simpleexamplezx81.asm|46|||0|16421|T|LAST_K:
-simpleexamplezx81.asm|46|||0|16421|L|,LAST_K,,
-simpleexamplezx81.asm|47|||0|16421|T|.row db $FF
-simpleexamplezx81.asm|47|||0|16421|L|,.row,,
-simpleexamplezx81.asm|48|||0|16422|T|.column db $FF
-simpleexamplezx81.asm|48|||0|16422|L|,.column,,
-simpleexamplezx81.asm|49|||0|16423|T|DB_ST db $FF
-simpleexamplezx81.asm|49|||0|16423|L|,DB_ST,,
-simpleexamplezx81.asm|50|||0|16424|T|MARGIN db 55
-simpleexamplezx81.asm|50|||0|16424|L|,MARGIN,,
-simpleexamplezx81.asm|51|||0|16425|T|NXTLIN dw line1a4 - 4
-simpleexamplezx81.asm|51|||0|16425|L|,NXTLIN,,
-simpleexamplezx81.asm|52|||0|16427|T|OLDPPC dw $0101
-simpleexamplezx81.asm|52|||0|16427|L|,OLDPPC,,
-simpleexamplezx81.asm|53|||0|16429|T|FLAGX db $01
-simpleexamplezx81.asm|53|||0|16429|L|,FLAGX,,
-simpleexamplezx81.asm|54|||0|16430|T|STRLEN dw $0101
-simpleexamplezx81.asm|54|||0|16430|L|,STRLEN,,
-simpleexamplezx81.asm|55|||0|16432|T|T_ADDR dw $0101
-simpleexamplezx81.asm|55|||0|16432|L|,T_ADDR,,
-simpleexamplezx81.asm|56|||0|16434|T|SEED dw $0101
-simpleexamplezx81.asm|56|||0|16434|L|,SEED,,
-simpleexamplezx81.asm|57|||0|16436|T|FRAMES db $FF,$FF
-simpleexamplezx81.asm|57|||0|16436|L|,FRAMES,,
-simpleexamplezx81.asm|58|||0|16438|T|COORDS db $01,$01
-simpleexamplezx81.asm|58|||0|16438|L|,COORDS,,
-simpleexamplezx81.asm|59|||0|16440|T|PR_CC db $01
-simpleexamplezx81.asm|59|||0|16440|L|,PR_CC,,
-simpleexamplezx81.asm|60|||0|16441|T|S_POSN db $01,$01
-simpleexamplezx81.asm|60|||0|16441|L|,S_POSN,,
-simpleexamplezx81.asm|61|||0|16443|T|CDFLAG db 01000000B
-simpleexamplezx81.asm|61|||0|16443|L|,CDFLAG,,
-simpleexamplezx81.asm|63|||0|16444|T|assert $ eq $403c
-simpleexamplezx81.asm|79|||0|16444|T|maincycle:
-simpleexamplezx81.asm|79|||0|16444|L|,maincycle,,
-simpleexamplezx81.asm|81|||0|16444|T|ld a,(LAST_K)
-simpleexamplezx81.asm|82|||0|16447|T|inc a
-simpleexamplezx81.asm|83|||0|16448|T|jrp nz,maincycle
-simpleexamplezx81.asm|85|||0|16450|T|gotkey:
-simpleexamplezx81.asm|85|||0|16450|L|,gotkey,,
-simpleexamplezx81.asm|86|||0|16450|T|ld bc,(LAST_K)
-simpleexamplezx81.asm|87|||0|16454|T|ld a,c
-simpleexamplezx81.asm|88|||0|16455|T|inc a
-simpleexamplezx81.asm|89|||0|16456|T|jr z,gotkey
-simpleexamplezx81.asm|90|||0|16458|T|call DECODEKEY
-simpleexamplezx81.asm|91|||0|16461|T|jr nc,gotkey
-simpleexamplezx81.asm|92|||0|16463|T|ld a,(hl)
-simpleexamplezx81.asm|94|||0|16464|T|ld (chardisplay),a
-simpleexamplezx81.asm|96|||0|16467|T|jrp maincycle
-simpleexamplezx81.asm|99|||0|16469|T|dfile:
-simpleexamplezx81.asm|99|||0|16469|L|,dfile,,
-simpleexamplezx81.asm|100|||0|16469|T|db $76
-simpleexamplezx81.asm|101|||0|16470|T|chardisplay: db _iX
-simpleexamplezx81.asm|101|||0|16470|L|,chardisplay,,
-simpleexamplezx81.asm|102|||0|16471|T|
-simpleexamplezx81.asm|102|||0|16471|T|
-simpleexamplezx81.asm|102|||0|16471|T|db 24 dup($76)
-simpleexamplezx81.asm|103|||0|16495|T|db $76
-simpleexamplezx81.asm|113|||0|16496|T|maxstackavailable:
-simpleexamplezx81.asm|113|||0|16496|L|,maxstackavailable,,
-simpleexamplezx81.asm|119|||0|16496|T|system_init:
-simpleexamplezx81.asm|119|||0|16496|L|,system_init,,
-simpleexamplezx81.asm|122|||0|16496|T|ld sp,MEMORY1KEND
-simpleexamplezx81.asm|139|||0|16499|T|jrp maincycle
-simpleexamplezx81.asm|150|||0|16501|T|line1a4:
-simpleexamplezx81.asm|150|||0|16501|L|,line1a4,,
-simpleexamplezx81.asm|151|||0|16501|T|db $F9,$D4
-simpleexamplezx81.asm|153|||0|16503|T|db $1c,$7e
-simpleexamplezx81.asm|154|||0|16505|T|db $8f
-simpleexamplezx81.asm|155|||0|16506|T|STARTING_ADDRESS = system_init
-simpleexamplezx81.asm|155|||0|0|L|,STARTING_ADDRESS,,
-simpleexamplezx81.asm|156|||0|16506|T|MANTISSA1 = (STARTING_ADDRESS-16384)/128
-simpleexamplezx81.asm|156|||0|0|L|,MANTISSA1,,
-simpleexamplezx81.asm|157|||0|16506|T|db MANTISSA1
-simpleexamplezx81.asm|158|||0|16507|T|db (STARTING_ADDRESS-16384)*2-MANTISSA1*256
-simpleexamplezx81.asm|166|||0|16508|T|line1end:
-simpleexamplezx81.asm|166|||0|16508|L|,line1end,,
-simpleexamplezx81.asm|168|||0|16508|T|vars2:
-simpleexamplezx81.asm|168|||0|16508|L|,vars2,,
-simpleexamplezx81.asm|169|||0|16508|T|db $80
-simpleexamplezx81.asm|170|||0|16509|T|end_vars:
-simpleexamplezx81.asm|170|||0|16509|L|,end_vars,,
-simpleexamplezx81.asm|172|||0|16509|T|eline:
-simpleexamplezx81.asm|172|||0|16509|L|,eline,,
-simpleexamplezx81.asm|174|||0|16509|T|endoftape:
-simpleexamplezx81.asm|174|||0|16509|L|,endoftape,,
-simpleexamplezx81.asm|178|||0|16509|T|total_lenght = $ - MEMORYSTART
-simpleexamplezx81.asm|178|||0|0|L|,total_lenght,,
-simpleexamplezx81.asm|179|||0|16509|T|displayindecimal 'Total lenght', total_lenght
-simpleexamplezx81.asm|180|||0|16509|T|assert total_lenght <= 958
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|2|0|16384|L|,MEMORYSTART,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|3|0|17408|L|,MEMORY1KEND,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|6|0|16384|L|,ERR_NR,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|7|0|16385|L|,FLAGS,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|8|0|16386|L|,ERR_SP,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|9|0|16388|L|,RAMTOP,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|10|0|16390|L|,MODE,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|11|0|16391|L|,PPC,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|15|0|16393|L|,VERSN,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|16|0|16394|L|,E_PPC,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|17|0|16396|L|,D_FILE,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|18|0|16398|L|,DF_CC,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|19|0|16400|L|,VARS,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|20|0|16402|L|,DEST,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|21|0|16404|L|,E_LINE,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|22|0|16406|L|,CH_ADD,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|23|0|16408|L|,X_PTR,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|24|0|16410|L|,STKBOT,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|25|0|16412|L|,STKEND,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|26|0|16414|L|,BERG,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|27|0|16415|L|,MEM,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|28|0|16417|L|,NOTUSED,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|29|0|16418|L|,DF_SZ,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|30|0|16419|L|,S_TOP,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|31|0|16421|L|,LAST_K,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|32|0|16421|L|,.row,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|33|0|16422|L|,.column,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|34|0|16423|L|,DB_ST,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|35|0|16424|L|,MARGIN,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|36|0|16425|L|,NXTLIN,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|37|0|16427|L|,OLDPPC,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|38|0|16429|L|,FLAGX,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|39|0|16430|L|,STRLEN,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|40|0|16432|L|,T_ADDR,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|41|0|16434|L|,SEED,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|42|0|16436|L|,FRAMES,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|43|0|16438|L|,COORDS,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|44|0|16440|L|,PR_CC,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|45|0|16441|L|,S_POSN,,
+simpleexamplezx81.asm|-1|includes/pgmprefix.inc|46|0|16443|L|,CDFLAG,,
+simpleexamplezx81.asm|20|||0|16444|T|maincycle:
+simpleexamplezx81.asm|20|||0|16444|L|,maincycle,,
+simpleexamplezx81.asm|22|||0|16444|T|ld a,(LAST_K)
+simpleexamplezx81.asm|23|||0|16447|T|inc a
+simpleexamplezx81.asm|24|||0|16448|T|jrp nz,maincycle
+simpleexamplezx81.asm|26|||0|16450|T|gotkey:
+simpleexamplezx81.asm|26|||0|16450|L|,gotkey,,
+simpleexamplezx81.asm|27|||0|16450|T|ld bc,(LAST_K)
+simpleexamplezx81.asm|28|||0|16454|T|ld a,c
+simpleexamplezx81.asm|29|||0|16455|T|inc a
+simpleexamplezx81.asm|30|||0|16456|T|jr z,gotkey
+simpleexamplezx81.asm|31|||0|16458|T|call DECODEKEY
+simpleexamplezx81.asm|32|||0|16461|T|jr nc,gotkey
+simpleexamplezx81.asm|33|||0|16463|T|ld a,(hl)
+simpleexamplezx81.asm|35|||0|16464|T|ld (chardisplay),a
+simpleexamplezx81.asm|37|||0|16467|T|jrp maincycle
+simpleexamplezx81.asm|41|||0|16469|T|dfile:
+simpleexamplezx81.asm|41|||0|16469|L|,dfile,,
+simpleexamplezx81.asm|42|||0|16469|T|db $76
+simpleexamplezx81.asm|43|||0|16470|T|chardisplay: db _iX
+simpleexamplezx81.asm|43|||0|16470|L|,chardisplay,,
+simpleexamplezx81.asm|44|||0|16471|T|
+simpleexamplezx81.asm|44|||0|16471|T|
+simpleexamplezx81.asm|44|||0|16471|T|db 24 dup($76)
+simpleexamplezx81.asm|47|||0|16495|T|maxstackavailable:
+simpleexamplezx81.asm|47|||0|16495|L|,maxstackavailable,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|1|0|16495|T|system_init:
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|1|0|16495|L|,system_init,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|4|0|16495|T|ld sp,MEMORY1KEND
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|21|0|16498|T|jrp maincycle
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|32|0|16500|T|line1a4:
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|32|0|16500|L|,line1a4,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|33|0|16500|T|db $F9,$D4
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|35|0|16502|T|db $1c,$7e
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|36|0|16504|T|db $8f
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|37|0|16505|T|STARTING_ADDRESS = system_init
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|37|0|0|L|,STARTING_ADDRESS,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|38|0|16505|T|MANTISSA1 = (STARTING_ADDRESS-16384)/128
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|38|0|0|L|,MANTISSA1,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|39|0|16505|T|db MANTISSA1
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|40|0|16506|T|db (STARTING_ADDRESS-16384)*2-MANTISSA1*256
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|48|0|16507|T|line1end:
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|48|0|16507|L|,line1end,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|50|0|16507|T|vars2:
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|50|0|16507|L|,vars2,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|51|0|16507|T|db $80
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|52|0|16508|T|end_vars:
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|52|0|16508|L|,end_vars,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|54|0|16508|T|eline:
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|54|0|16508|L|,eline,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|56|0|16508|T|endoftape:
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|56|0|16508|L|,endoftape,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|60|0|16508|T|total_lenght = $ - MEMORYSTART
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|60|0|0|L|,total_lenght,,
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|61|0|16508|T|displayindecimal 'Total lenght', total_lenght
+simpleexamplezx81.asm|47|includes/pgmsuffix.inc|62|0|16508|T|assert total_lenght <= 958
