@@ -1,11 +1,20 @@
 {
-    // fasmg ez80 compilation of simpleexamplezx81.asm
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
     "version": "2.0.0",
     "tasks": [
-        {
-            "label": "fasmg ez80",
+                {
+            "label": "compilewithfasmg",
             "type": "shell",
-            "command": "./compile-simpleexamplezx81.sh"
+            "command": "./compile-simpleexamplezx81.sh", 
+            "args": [
+                "--fullpath",
+                "--sld=${fileDirname}/${fileBasenameNoExtension}.sld",
+                "${file}"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

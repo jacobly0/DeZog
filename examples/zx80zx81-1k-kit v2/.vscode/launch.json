@@ -1,36 +1,35 @@
-// vscode-DeZog configuration file
-
 {
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-    {
-        "type": "dezog",
-        "request": "launch",
-        "name": "DeZog",
-        "remoteType": "zrcp",
-        "zrcp": {
-            "port": 10000
-        },
-        "sjasmplus": [
-            {
-                "path": "simpleexamplezx81.sld",
-            }
-        ],
-        "startAutomatically": false,
-        "history": {
-            "reverseDebugInstructionCount": 10000,
-            "codeCoverageEnabled": true
-        },
-        "commandsAfterLaunch": [],
-        "disassemblerArgs": {
-            "numberOfLines": 20,
-            "esxdosRst": true
-        },
-        "rootFolder": "${workspaceFolder}",
-        "topOfStack": "MEMORY1KEND",
-        "load": "simpleexamplezx81.p",
-        "smallValuesMaximum": 513,
-        "tmpDir": ".tmp"
-    }
+        {
+            "type": "dezog",
+            "request": "launch",
+            "name": "Dezog Z80 Debugger",
+            "remoteType": "zrcp",
+            "zrcp": {
+                "hostname": "localhost",
+                "port": 10000,
+                "skipInterrupt": true
+            },
+            "topOfStack": "MEMORY1KEND",
+            "rootFolder": "${fileDirname}",
+            "sjasmplus": [
+              {
+                  "path": "${fileDirname}/${fileBasenameNoExtension}.sld",
+                  "useFiles": true,
+                  "asm": "sjasmplus",
+                  "mainFile": "${fileDirname}/${fileBasenameNoExtension}.asm"
+              }
+            ],
+            "disassemblerArgs": {
+                "esxdosRst": true
+            },
+            "loadObjs": [
+                { "path": "${fileDirname}/${fileBasenameNoExtension}.p", "start": "0x4009" },
+            ],
+            "startAutomatically": true,
+            "preLaunchTask": "compilewithfasmg"
+        }
     ]
 }
