@@ -4,9 +4,9 @@
 ; to be compiled with fasmg
 
 ; compilation utils
-include 'includes/ez80.inc' ; Z80 instructions
-assume adl = 0 ; no ez80 extended instructions (but simple z80 ones)
-include 'includes/fasmgutils.inc' ; listing etc.
+format binary as 'p' ; default output file extension
+include 'includes/z80.inc' ; Z80 instructions
+include 'includes/makesld.alm' ; listing etc.
 include 'includes/z80optmc.inc' ; jrp pseudo instruction
 include 'includes/romadd81.inc' ; rom addresses
 include 'includes/charst81.inc' ; zx81 characters

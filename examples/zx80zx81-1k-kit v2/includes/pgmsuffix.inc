@@ -27,7 +27,7 @@ system_init:
 
     ; db $00,$53 ; line number (big endian)
     ; dw line1end-$-2 ; line length (little endian)
-    ; commenting line numbers above take line number (quite ok) and lenght(attention!) from previous bytes
+    ; commenting line numbers above take line number (quite ok) and length(attention!) from previous bytes
     
 line1a4: ; AUTORUN here - 4 (line number and length are fictitious, "almost" every value will fit)
     db $F9,$D4 ; RAND USR
@@ -57,8 +57,10 @@ endoftape: ;-- End of ".o" or ".p" -----------------
 
 ;================================================================
 
-total_lenght = $ - MEMORYSTART
-displayindecimal "Total lenght", total_lenght
-assert total_lenght <= 958 ; 958-9 = 949 .p payload MAX (all included) that seems allowed by _standard_ BASIC loader!
+total_length = $ - MEMORYSTART
+repeat 1, stringify: total_length
+    display "Total length: ", `stringify, 10
+end repeat
+assert total_length <= 958 ; 958-9 = 949 .p payload MAX (all included) that seems allowed by _standard_ BASIC loader!
 
 ;================================================================
